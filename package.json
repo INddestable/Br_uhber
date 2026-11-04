@@ -5,7 +5,10 @@
   "dependencies": {
     "expo": "~57.0.30",
     "expo-status-bar": "~57.0.1",
+    "firebase": "^13.2.0",
+    "i18next": "^26.7.1",
     "react": "19.2.3",
+    "react-i18next": "^17.1.12",
     "react-native": "0.86.3"
   },
   "scripts": {

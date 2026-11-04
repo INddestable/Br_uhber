@@ -1,0 +1,19 @@
+{
+  "login": {
+    "title": "Bienvenido",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "button": "Iniciar sesión"
+  },
+  "register": {
+    "title": "Registro de conductor",
+    "personal": "Datos personales",
+    "vehicle": "Vehículo",
+    "documents": "Documentos",
+    "submit": "Enviar registro"
+  },
+  "pending": {
+    "title": "Registro en revisión",
+    "description": "Estamos verificando tus documentos."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "login": {
+    "title": "Welcome",
+    "email": "Email",
+    "password": "Password",
+    "button": "Sign in"
+  },
+  "register": {
+    "title": "Driver registration",
+    "personal": "Personal information",
+    "vehicle": "Vehicle",
+    "documents": "Documents",
+    "submit": "Submit registration"
+  },
+  "pending": {
+    "title": "Registration under review",
+    "description": "We are verifying your documents."
+  }
+}
