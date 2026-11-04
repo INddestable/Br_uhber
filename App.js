@@ -1,16 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { AuthProvider } from "./src/context/AuthContext";
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
   return (
-      <AuthProvider>
-          <View style={styles.container}>
-              <Text>Bruhber</Text>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+          <AuthProvider>
+                <NavigationContainer>
+                    {/* navegador*/}
+                </NavigationContainer>
               <StatusBar style="auto" />
-          </View>
-      </AuthProvider>
+          </AuthProvider>
+      </GestureHandlerRootView>
   );
 }
 
