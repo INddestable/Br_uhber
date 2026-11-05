@@ -4,9 +4,15 @@ const RegistrationContext = createContext();
 
 export function RegistrationProvider({ children }) {
     const [formData, setFormData] = useState({});
+    const updateFormData = (field, value) => {
+        setFormData((previousData) => ({
+            ...previousData,
+            [field]: value
+        }));
+    };
 
     return (
-        <RegistrationContext.Provider value={{ formData, setFormData }}>
+        <RegistrationContext.Provider value={{ formData, updateFormData }}>
             {children}
         </RegistrationContext.Provider>
     );
