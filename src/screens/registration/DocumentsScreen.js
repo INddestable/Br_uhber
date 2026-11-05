@@ -8,17 +8,22 @@ import {
     Image,
     StyleSheet,
     Modal,
-    Platform
+    Platform,
+    Alert, ActivityIndicator
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { registerDriver } from "../../services/driverScreen";
 
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
 
+
 // Regla provisional: revisión técnico-mecánica a partir de 5 años.
 const TECHNICAL_REVIEW_AGE = 5;
+
+
 
 // Convierte una fecha a YYYY-MM-DD sin desfase de zona horaria.
 function formatDate(date) {
@@ -53,6 +58,7 @@ function isValidEmail(email) {
 export default function DocumentsScreen({ navigation }) {
     const { t } = useTranslation();
     const { formData, updateFormData } = useRegistration();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [showErrors, setShowErrors] = useState(false);
     const [touched, setTouched] = useState({});
@@ -157,15 +163,37 @@ export default function DocumentsScreen({ navigation }) {
     const isFormValid = Object.values(validation).every(Boolean);
 
     // Intentar continuar.
-    function handleContinue() {
+    async function handleContinue() {
         setShowErrors(true);
 
-        if (!isFormValid) {
+        if (!isFormValid || isSubmitting) {
             return;
         }
 
-        // Próximo paso: finalizar el registro.
-        // La navegación se conectará cuando definamos el destino final.
+        setIsSubmitting(true);
+
+        try {
+            const result = await registerDriver(formData);
+
+            console.log("Registro completado:", result.uid);
+
+            // Ya no necesitamos conservar la contraseña.
+            updateFormData("password", "");
+
+            // Ir a la pantalla de aprobación pendiente.
+            navigation.replace("Pending");
+
+        } catch (error) {
+            console.error("Error completando el registro:", error);
+
+            Alert.alert(
+                t("documents.registrationErrorTitle"),
+                t("documents.registrationErrorMessage")
+            );
+
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     // Componente para mostrar errores.
@@ -459,10 +487,15 @@ export default function DocumentsScreen({ navigation }) {
             <Pressable
                 style={styles.continueButton}
                 onPress={handleContinue}
+                disabled={isSubmitting}
             >
-                <Text style={styles.continueButtonText}>
-                    {t("documents.continue")}
-                </Text>
+                {isSubmitting ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                    <Text style={styles.continueButtonText}>
+                        {t("documents.continue")}
+                    </Text>
+                )}
             </Pressable>
         </ScrollView>
     );
