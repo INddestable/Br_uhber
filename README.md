@@ -441,3 +441,13 @@ Developed as a software engineering academic project, exploring mobile applicati
 <p align="center">
   <strong>One platform. Multiple possibilities. A new direction for mobility.</strong>
 </p>
+
+## 12. AI Usage Disclosure
+
+Artificial intelligence tools were used as supporting resources throughout the development of Bruhber.
+
+Their use included technical research, Firebase and Cloudinary integration guidance, internationalization, theme management, troubleshooting, and documentation support.
+
+All relevant AI-assisted activities are documented in the project's AI usage log.
+
+**Full documentation:** [AI Usage Log](docs/AI_LOG.md)
