@@ -97,5 +97,56 @@
         "photoDescription": "Selecciona una fotografía donde se pueda observar claramente la placa del vehículo.",
         "selectPhoto": "Seleccionar fotografía",
         "changePhoto": "Cambiar fotografía"
+    },
+    "documents": {
+        "title": "Documentación del conductor",
+        "description": "Completa la información y adjunta los documentos solicitados.",
+        "selectPhoto": "Seleccionar fotografía",
+        "selectDate": "Seleccionar fecha",
+        "confirmDate": "Confirmar fecha",
+        "continue": "Continuar",
+
+        "license": {
+        "title": "Licencia de conducción",
+        "number": "Número de licencia",
+        "numberPlaceholder": "Ingresa el número de licencia",
+        "photo": "Fotografía de la licencia",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "soat": {
+        "title": "SOAT",
+        "photo": "Fotografía del SOAT",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "technicalReview": {
+        "title": "Revisión técnico-mecánica",
+        "description": "Tu vehículo requiere este documento según su antigüedad.",
+        "photo": "Fotografía de la revisión técnico-mecánica",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "payment": {
+        "title": "Mercado Pago",
+        "description": "Ingresa el correo electrónico asociado a tu cuenta de Mercado Pago.",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "ejemplo@correo.com"
+        },
+
+        "terms": {
+        "title": "Términos y condiciones",
+        "commission": "Bruhber cobra una comisión del 20% sobre el valor de cada viaje.",
+        "tips": "El 100% de las propinas corresponde al conductor.",
+        "accept": "He leído y acepto los términos y condiciones."
+        },
+
+        "errors": {
+        "licenseNumber": "Ingresa el número de tu licencia.",
+        "photo": "Debes adjuntar esta fotografía.",
+        "expiration": "La fecha de vencimiento debe ser posterior a hoy.",
+        "email": "Ingresa un correo electrónico válido.",
+        "terms": "Debes aceptar los términos y condiciones."
+        }
     }
 }

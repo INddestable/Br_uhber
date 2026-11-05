@@ -97,5 +97,56 @@
         "photoDescription": "Select a photograph where the vehicle's license plate is clearly visible.",
         "selectPhoto": "Select photograph",
         "changePhoto": "Change photograph"
+    },
+    "documents": {
+        "title": "Driver documentation",
+        "description": "Complete your information and attach the required documents.",
+        "selectPhoto": "Select photo",
+        "selectDate": "Select date",
+        "confirmDate": "Confirm date",
+        "continue": "Continue",
+
+        "license": {
+        "title": "Driving license",
+        "number": "License number",
+        "numberPlaceholder": "Enter your license number",
+        "photo": "Driving license photo",
+        "expiration": "Expiration date"
+        },
+
+        "soat": {
+        "title": "SOAT",
+        "photo": "SOAT photo",
+        "expiration": "Expiration date"
+        },
+
+        "technicalReview": {
+        "title": "Technical inspection",
+        "description": "Your vehicle requires this document according to its age.",
+        "photo": "Technical inspection photo",
+        "expiration": "Expiration date"
+        },
+
+        "payment": {
+        "title": "Mercado Pago",
+        "description": "Enter the email address associated with your Mercado Pago account.",
+        "email": "Email address",
+        "emailPlaceholder": "example@email.com"
+        },
+
+        "terms": {
+        "title": "Terms and conditions",
+        "commission": "Bruhber charges a 20% commission on the value of each trip.",
+        "tips": "100% of tips belong to the driver.",
+        "accept": "I have read and accept the terms and conditions."
+        },
+
+        "errors": {
+        "licenseNumber": "Enter your license number.",
+        "photo": "You must attach this photo.",
+        "expiration": "The expiration date must be later than today.",
+        "email": "Enter a valid email address.",
+        "terms": "You must accept the terms and conditions."
+        }
     }
 }

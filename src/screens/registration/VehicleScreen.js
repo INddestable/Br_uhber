@@ -54,7 +54,7 @@ function validateVehicleYear(year) {
 
   return (
     yearRegex.test(String(year)) &&
-    Number(year) <= new Date().getFullYear()+1
+    Number(year) <= new Date().getFullYear()//+1
   );
 }
 
@@ -127,6 +127,15 @@ export default function VehicleScreen({ navigation }) {
         }
     };
 
+    const handleContinue = () => {
+        setShowErrors(true);
+
+        if (!isFormValid) {
+            return;
+        }
+
+        navigation.navigate("Documents");
+    };
 
 return (
     <ScrollView>
@@ -400,6 +409,11 @@ return (
                 {t("vehicle.errors.photo")}
                 </Text>
             )}
+
+            <Button
+                title={t("register.continue")}
+                onPress={handleContinue}
+            />
 
         </View>
     </ScrollView>
