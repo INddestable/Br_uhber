@@ -1,0 +1,167 @@
+{
+    "auth": {
+        "register": {
+            "title": "Create account",
+            "password": "Password",
+            "passwordPlaceholder": "Enter your password",
+            "passwordError": "Password must contain at least 6 characters.",
+            "confirmPassword": "Confirm password",
+            "confirmPasswordPlaceholder": "Repeat your password",
+            "passwordMismatch": "Passwords do not match.",
+            "continue": "Start registration"
+        }
+    },
+    "login": {
+        "title": "Welcome",
+        "email": "Email",
+        "password": "Password",
+        "button": "Sign in",
+        "registerLink": "Don't have an account? Sign up"
+    },
+    "register": {
+        "title": "Driver registration",
+        "personal": "Personal information",
+        "vehicle": "Vehicle",
+        "documents": "Documents",
+        "submit": "Submit registration",
+        "continue": "Continue"
+    },
+    "personalData": {
+        "title": "Personal information",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "Enter your full name",
+        "documentNumber": "Identity document",
+        "documentNumberPlaceholder": "Document number",
+        "phone": "Phone number",
+        "phonePlaceholder": "Enter your phone number",
+        "email": "Email address",
+        "emailPlaceholder": "example@email.com",
+        "birthDate": "Date of birth",
+        "birthDatePlaceholder": "Select date",
+        "gender": {
+            "title": "Gender",
+            "male": "Male",
+            "female": "Female",
+            "other": "Other",
+            "preferNotToSay": "Prefer not to say"
+        },
+        "profilePhoto": "Profile photo",
+        "changePhoto": "Select or change photo",
+        "language": {
+            "title": "Language",
+            "spanish": "Spanish",
+            "english": "English"
+        },
+        "errors": {
+            "fullName": "Enter a valid name (maximum 50 characters).",
+            "documentNumber": "The document must contain between 6 and 10 digits.",
+            "phone": "The phone number must contain exactly 10 digits.",
+            "email": "Enter a valid email address.",
+            "birthDate": "You must be at least 18 years old.",
+            "profilePhoto": "A profile photo is required.",
+            "gender": "Select a gender option."
+        }
+    },
+    "pending": {
+        "title": "Registration under review",
+        "description": "We are verifying your documents."
+    },
+    "vehicle": {
+        "title": "Vehicle information",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "categories": {
+            "economy": "Economy",
+            "xl": "XL",
+            "premium": "Premium"
+        },
+        "color": "Vehicle color",
+        "colorPlaceholder": "Select a color",
+        "colors": {
+            "white": "White",
+            "black": "Black",
+            "gray": "Gray",
+            "red": "Red",
+            "blue": "Blue",
+            "silver": "Silver",
+            "other": "Other"
+        },
+        "errors": {
+            "category": "Select a valid category.",
+            "color": "Select a color.",
+            "plate": "Enter a valid plate (3 letters and 3 numbers).",
+            "brand": "Enter the vehicle brand.",
+            "model": "Enter the vehicle model.",
+            "year": "Enter a valid four-digit year.",
+            "capacity": "Capacity must be at least 6 passengers for XL and 1 for other categories.",
+            "photo": "You must select a photograph of the vehicle."
+        },
+        "plate": "Vehicle license plate",
+        "platePlaceholder": "E.g. ABC123",
+        "brand": "Brand",
+        "brandPlaceholder": "E.g. Toyota",
+        "model": "Model",
+        "modelPlaceholder": "E.g. Corolla",
+        "year": "Vehicle year",
+        "yearPlaceholder": "E.g. 2022",
+        "capacity": "Passenger capacity",
+        "capacityPlaceholder": "E.g. 4",
+        "photo": "Vehicle photograph",
+        "photoDescription": "Select a photograph where the vehicle's license plate is clearly visible.",
+        "selectPhoto": "Select photograph",
+        "changePhoto": "Change photograph"
+    },
+    "documents": {
+        "title": "Driver documentation",
+        "description": "Complete your information and attach the required documents.",
+        "selectPhoto": "Select photo",
+        "selectDate": "Select date",
+        "confirmDate": "Confirm date",
+        "continue": "Continue",
+
+        "license": {
+        "title": "Driving license",
+        "number": "License number",
+        "numberPlaceholder": "Enter your license number",
+        "photo": "Driving license photo",
+        "expiration": "Expiration date"
+        },
+
+        "soat": {
+        "title": "SOAT",
+        "photo": "SOAT photo",
+        "expiration": "Expiration date"
+        },
+
+        "technicalReview": {
+        "title": "Technical inspection",
+        "description": "Your vehicle requires this document according to its age.",
+        "photo": "Technical inspection photo",
+        "expiration": "Expiration date"
+        },
+
+        "payment": {
+        "title": "Mercado Pago",
+        "description": "Enter the email address associated with your Mercado Pago account.",
+        "email": "Email address",
+        "emailPlaceholder": "example@email.com"
+        },
+
+        "terms": {
+        "title": "Terms and conditions",
+        "commission": "Bruhber charges a 20% commission on the value of each trip.",
+        "tips": "100% of tips belong to the driver.",
+        "accept": "I have read and accept the terms and conditions."
+        },
+
+        "errors": {
+        "licenseNumber": "Enter your license number.",
+        "photo": "You must attach this photo.",
+        "expiration": "The expiration date must be later than today.",
+        "email": "Enter a valid email address.",
+        "terms": "You must accept the terms and conditions."
+        },
+        "registrationErrorTitle": "Registration error",
+        "registrationErrorMessage": "Registration could not be completed. Check your connection and try again."
+    }
+}

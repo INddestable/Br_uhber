@@ -1,0 +1,167 @@
+{
+    "auth": {
+        "register": {
+            "title": "Crear cuenta",
+            "password": "Contraseña",
+            "passwordPlaceholder": "Crea tu contraseña",
+            "passwordError": "La contraseña debe tener al menos 6 caracteres.",
+            "confirmPassword": "Confirmar contraseña",
+            "confirmPasswordPlaceholder": "Repite tu contraseña",
+            "passwordMismatch": "Las contraseñas no coinciden.",
+            "continue": "Comenzar registro"
+        }
+    },
+    "login": {
+        "title": "Bienvenido",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "button": "Ingresar",
+        "registerLink": "¿No tienes cuenta? Regístrate"
+    },
+    "register": {
+        "title": "Registro de conductor",
+        "personal": "Datos personales",
+        "vehicle": "Vehículo",
+        "documents": "Documentos",
+        "submit": "Enviar registro",
+        "continue": "Continuar"
+    },
+    "personalData": {
+        "title": "Datos personales",
+        "fullName": "Nombre completo",
+        "fullNamePlaceholder": "Escribe tu nombre completo",
+        "documentNumber": "Documento de identidad",
+        "documentNumberPlaceholder": "Número de documento",
+        "phone": "Teléfono",
+        "phonePlaceholder": "Número de teléfono",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "ejemplo@correo.com",
+        "birthDate": "Fecha de nacimiento",
+        "birthDatePlaceholder": "Seleccionar fecha",
+        "gender": {
+            "title": "Género",
+            "male": "Masculino",
+            "female": "Femenino",
+            "other": "Otro",
+            "preferNotToSay": "Prefiero no decirlo"
+        },
+        "profilePhoto": "Foto de perfil",
+        "changePhoto": "Seleccionar o cambiar fotografía",
+        "language": {
+            "title": "Idioma",
+            "spanish": "Español",
+            "english": "Inglés"
+        },
+        "errors": {
+            "fullName": "Ingresa un nombre válido (máximo 50 caracteres).",
+            "documentNumber": "El documento debe tener entre 6 y 10 dígitos.",
+            "phone": "El teléfono debe tener exactamente 10 dígitos.",
+            "email": "Ingresa un correo electrónico válido.",
+            "birthDate": "Debes tener al menos 18 años.",
+            "profilePhoto": "La fotografía de perfil es obligatoria.",
+            "gender": "Selecciona una opción de género."
+        }
+    },
+    "pending": {
+        "title": "Registro en revisión",
+        "description": "Estamos verificando tus documentos."
+    },
+    "vehicle": {
+        "title": "Información del vehículo",
+        "category": "Categoría",
+        "categoryPlaceholder": "Selecciona una categoría",
+        "categories": {
+            "economy": "Económico",
+            "xl": "XL",
+            "premium": "Premium"
+        },
+        "color": "Color del vehículo",
+        "colorPlaceholder": "Selecciona un color",
+        "colors": {
+            "white": "Blanco",
+            "black": "Negro",
+            "gray": "Gris",
+            "red": "Rojo",
+            "blue": "Azul",
+            "silver": "Plateado",
+            "other": "Otro"
+        },
+        "errors": {
+            "category": "Selecciona una categoría válida.",
+            "color": "Selecciona un color.",
+            "plate": "Ingresa una placa válida (3 letras y 3 números).",
+            "brand": "Ingresa la marca del vehículo.",
+            "model": "Ingresa el modelo del vehículo.",
+            "year": "Ingresa un año válido de cuatro dígitos.",
+            "capacity": "La capacidad debe ser de al menos 6 pasajeros para XL y 1 para las demás categorías.",
+            "photo": "Debes seleccionar una fotografía del vehículo."
+        },
+        "plate": "Placa del vehículo",
+        "platePlaceholder": "Ej. ABC123",
+        "brand": "Marca",
+        "brandPlaceholder": "Ej. Toyota",
+        "model": "Modelo",
+        "modelPlaceholder": "Ej. Corolla",
+        "year": "Año del vehículo",
+        "yearPlaceholder": "Ej. 2022",
+        "capacity": "Capacidad de pasajeros",
+        "capacityPlaceholder": "Ej. 4",
+        "photo": "Fotografía del vehículo",
+        "photoDescription": "Selecciona una fotografía donde se pueda observar claramente la placa del vehículo.",
+        "selectPhoto": "Seleccionar fotografía",
+        "changePhoto": "Cambiar fotografía"
+    },
+    "documents": {
+        "title": "Documentación del conductor",
+        "description": "Completa la información y adjunta los documentos solicitados.",
+        "selectPhoto": "Seleccionar fotografía",
+        "selectDate": "Seleccionar fecha",
+        "confirmDate": "Confirmar fecha",
+        "continue": "Continuar",
+
+        "license": {
+        "title": "Licencia de conducción",
+        "number": "Número de licencia",
+        "numberPlaceholder": "Ingresa el número de licencia",
+        "photo": "Fotografía de la licencia",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "soat": {
+        "title": "SOAT",
+        "photo": "Fotografía del SOAT",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "technicalReview": {
+        "title": "Revisión técnico-mecánica",
+        "description": "Tu vehículo requiere este documento según su antigüedad.",
+        "photo": "Fotografía de la revisión técnico-mecánica",
+        "expiration": "Fecha de vencimiento"
+        },
+
+        "payment": {
+        "title": "Mercado Pago",
+        "description": "Ingresa el correo electrónico asociado a tu cuenta de Mercado Pago.",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "ejemplo@correo.com"
+        },
+
+        "terms": {
+        "title": "Términos y condiciones",
+        "commission": "Bruhber cobra una comisión del 20% sobre el valor de cada viaje.",
+        "tips": "El 100% de las propinas corresponde al conductor.",
+        "accept": "He leído y acepto los términos y condiciones."
+        },
+
+        "errors": {
+        "licenseNumber": "Ingresa el número de tu licencia.",
+        "photo": "Debes adjuntar esta fotografía.",
+        "expiration": "La fecha de vencimiento debe ser posterior a hoy.",
+        "email": "Ingresa un correo electrónico válido.",
+        "terms": "Debes aceptar los términos y condiciones."
+        },
+        "registrationErrorTitle": "Error en el registro",
+        "registrationErrorMessage": "No se pudo completar el registro. Comprueba tu conexión e inténtalo nuevamente."
+    }
+}
