@@ -306,7 +306,7 @@ Before running Bruhber, make sure you have:
 Clone the repository:
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/INddestable/Br_uhber.git
 ```
 
 Navigate to the project directory:
