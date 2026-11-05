@@ -33,11 +33,86 @@ function formatBirthDate(dateString, language) {
     );
 }
 
+function validateFullName(name) {
+    const nameRegex = /^[\p{L}\s]+$/u;
 
+    return (
+        name.length <= 50 &&
+        nameRegex.test(name) &&
+        name.trim().length > 0
+    );
+}
+
+function validateDocumentNumber(documentNumber) {
+    const documentRegex = /^\d+$/;
+
+    return (
+        documentNumber.length >= 6 &&
+        documentNumber.length <= 10 &&
+        documentRegex.test(documentNumber)
+    );
+}
+
+function validatePhone(phone) {
+    const phoneRegex = /^\d{10}$/;
+
+    return phoneRegex.test(phone);
+}
+
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return emailRegex.test(email);
+}
+
+function validateBirthDate(birthDate) {
+    if (!birthDate) return false;
+
+    const today = new Date();
+    const birth = parseBirthDate(birthDate);
+
+    const minimumDate = new Date();
+    minimumDate.setFullYear(
+        minimumDate.getFullYear() - 18
+    );
+
+    return birth <= minimumDate && birth <= today;
+}
+
+function validateProfilePhoto(photo) {
+    return Boolean(photo);
+}
+
+function validateGender(gender) {
+    const validGenders = [
+        "male",
+        "female",
+        "other",
+        "preferNotToSay"
+    ];
+
+    return validGenders.includes(gender);
+}
+
+function validatePersonalData(data) {
+    return {
+        fullName: validateFullName(data.fullName || ""),
+        documentNumber: validateDocumentNumber(data.documentNumber || ""),
+        phone: validatePhone(data.phone || ""),
+        email: validateEmail(data.email || ""),
+        birthDate: validateBirthDate(data.birthDate),
+        profilePhoto: validateProfilePhoto(data.profilePhoto),
+        gender: validateGender(data.gender),
+        language: ["es", "en"].includes(data.language || "es")
+    };
+}
 
 export default function PersonalDataScreen() {
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
+
+    const validation = validatePersonalData(formData);
+    const isFormValid = Object.values(validation).every(Boolean);
 
     const genderOptions = [
         { label: "personalData.gender.male", value: "male" },
@@ -58,6 +133,7 @@ export default function PersonalDataScreen() {
 
     const [showDatePicker, setShowDatePicker] = useState(false);
 
+    const [showErrors, setShowErrors] = useState(false);
     // Calculamos la fecha máxima permitida para tener 18 años.
     const maxBirthDate = new Date();
     maxBirthDate.setFullYear(maxBirthDate.getFullYear() - 18);
