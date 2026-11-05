@@ -15,7 +15,8 @@
         "title": "Bienvenido",
         "email": "Correo electrónico",
         "password": "Contraseña",
-        "button": "Iniciar sesión"
+        "button": "Ingresar",
+        "registerLink": "¿No tienes cuenta? Regístrate"
     },
     "register": {
         "title": "Registro de conductor",

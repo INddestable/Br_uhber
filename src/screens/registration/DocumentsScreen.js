@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
     View,
@@ -9,7 +10,8 @@ import {
     StyleSheet,
     Modal,
     Platform,
-    Alert, ActivityIndicator
+    Alert,
+    ActivityIndicator
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
@@ -18,12 +20,10 @@ import { registerDriver } from "../../services/driverScreen";
 
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
-
+import { useTheme } from "../../context/ThemeContext";
 
 // Regla provisional: revisión técnico-mecánica a partir de 5 años.
 const TECHNICAL_REVIEW_AGE = 5;
-
-
 
 // Convierte una fecha a YYYY-MM-DD sin desfase de zona horaria.
 function formatDate(date) {
@@ -58,11 +58,195 @@ function isValidEmail(email) {
 export default function DocumentsScreen({ navigation }) {
     const { t } = useTranslation();
     const { formData, updateFormData } = useRegistration();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { colors } = useTheme();
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
     const [touched, setTouched] = useState({});
     const [datePicker, setDatePicker] = useState(null);
+
+    // Estilos dinámicos según el tema seleccionado.
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background
+        },
+        content: {
+            padding: 20,
+            paddingBottom: 40
+        },
+        title: {
+            fontSize: 26,
+            fontWeight: "bold",
+            marginBottom: 8,
+            color: colors.text
+        },
+        description: {
+            fontSize: 14,
+            color: colors.secondaryText,
+            marginBottom: 15
+        },
+        section: {
+            marginTop: 20,
+            padding: 15,
+            backgroundColor: colors.surface,
+            borderRadius: 10
+        },
+        sectionTitle: {
+            fontSize: 19,
+            fontWeight: "bold",
+            marginBottom: 15,
+            color: colors.text
+        },
+        fieldContainer: {
+            marginBottom: 15
+        },
+        label: {
+            fontSize: 15,
+            fontWeight: "600",
+            marginBottom: 7,
+            color: colors.text
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            padding: 12,
+            backgroundColor: colors.card,
+            color: colors.text,
+            fontSize: 15
+        },
+        photoButton: {
+            minHeight: 110,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderStyle: "dashed",
+            borderRadius: 8,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: colors.card,
+            overflow: "hidden"
+        },
+        photoButtonText: {
+            color: colors.secondaryText,
+            fontSize: 14
+        },
+        photoPreview: {
+            width: "100%",
+            height: 180,
+            resizeMode: "cover"
+        },
+        dateButton: {
+            padding: 13,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            backgroundColor: colors.card
+        },
+        dateButtonText: {
+            color: colors.text,
+            fontSize: 15
+        },
+        error: {
+            color: "#EF4444",
+            fontSize: 12,
+            marginTop: 5
+        },
+        commissionContainer: {
+            padding: 12,
+            backgroundColor: colors.card,
+            borderRadius: 8,
+            marginBottom: 15
+        },
+        commissionText: {
+            fontSize: 14,
+            color: colors.text,
+            marginVertical: 4
+        },
+        termsRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10
+        },
+        checkbox: {
+            width: 23,
+            height: 23,
+            borderWidth: 1,
+            borderColor: colors.secondaryText,
+            borderRadius: 4,
+            justifyContent: "center",
+            alignItems: "center"
+        },
+        checkboxChecked: {
+            backgroundColor: colors.primary,
+            borderColor: colors.primary
+        },
+        checkmark: {
+            color: "#FFFFFF",
+            fontWeight: "bold"
+        },
+        termsText: {
+            flex: 1,
+            fontSize: 14,
+            color: colors.text
+        },
+        modalBackground: {
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            justifyContent: "center",
+            padding: 20
+        },
+        dateModal: {
+            backgroundColor: colors.card,
+            borderRadius: 12,
+            padding: 15,
+            alignItems: "center"
+        },
+        modalTitle: {
+            fontSize: 18,
+            fontWeight: "bold",
+            marginBottom: 10,
+            color: colors.text
+        },
+        modalButton: {
+            backgroundColor: colors.primary,
+            padding: 12,
+            borderRadius: 8,
+            alignSelf: "stretch",
+            alignItems: "center",
+            marginTop: 10
+        },
+        modalButtonText: {
+            color: "#FFFFFF",
+            fontWeight: "bold"
+        },
+        continueButton: {
+            backgroundColor: colors.primary,
+            padding: 16,
+            borderRadius: 10,
+            alignItems: "center",
+            marginTop: 25
+        },
+        continueButtonText: {
+            color: "#FFFFFF",
+            fontSize: 16,
+            fontWeight: "bold"
+        },
+        settingsButton: {
+            alignSelf: "flex-end",
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+            borderRadius: 8,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            marginBottom: 15
+        },
+        settingsButtonText: {
+            color: colors.text,
+            fontWeight: "600"
+        }
+    });
 
     // Determinar si el vehículo requiere técnico-mecánica.
     const currentYear = new Date().getFullYear();
@@ -276,6 +460,16 @@ export default function DocumentsScreen({ navigation }) {
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
         >
+            {/* Acceso a ajustes */}
+            <Pressable
+                style={styles.settingsButton}
+                onPress={() => navigation.getParent()?.navigate("Settings")}
+            >
+                <Text style={styles.settingsButtonText}>
+                    {t("settings.title", "Ajustes")} ⚙
+                </Text>
+            </Pressable>
+
             <Text style={styles.title}>
                 {t("documents.title")}
             </Text>
@@ -284,7 +478,7 @@ export default function DocumentsScreen({ navigation }) {
                 {t("documents.description")}
             </Text>
 
-            {/* LICENCIA DE CONDUCCION */}
+            {/* LICENCIA DE CONDUCCIÓN */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
                     {t("documents.license.title")}
@@ -304,6 +498,7 @@ export default function DocumentsScreen({ navigation }) {
                         keyboardType="numeric"
                         onBlur={() => handleBlur("licenseNumber")}
                         placeholder={t("documents.license.numberPlaceholder")}
+                        placeholderTextColor={colors.secondaryText}
                         maxLength={30}
                     />
 
@@ -384,6 +579,7 @@ export default function DocumentsScreen({ navigation }) {
                         }
                         onBlur={() => handleBlur("paymentEmail")}
                         placeholder={t("documents.payment.emailPlaceholder")}
+                        placeholderTextColor={colors.secondaryText}
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoCorrect={false}
@@ -460,7 +656,7 @@ export default function DocumentsScreen({ navigation }) {
                                         : "default"
                                 }
                                 minimumDate={new Date()}
-                                    maximumDate={
+                                maximumDate={
                                     datePicker === "soatExpiration"
                                         ? maxSoatDate
                                         : undefined
@@ -485,7 +681,10 @@ export default function DocumentsScreen({ navigation }) {
 
             {/* CONTINUAR */}
             <Pressable
-                style={styles.continueButton}
+                style={[
+                    styles.continueButton,
+                    isSubmitting && { opacity: 0.7 }
+                ]}
                 onPress={handleContinue}
                 disabled={isSubmitting}
             >
@@ -500,169 +699,3 @@ export default function DocumentsScreen({ navigation }) {
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#FFFFFF"
-    },
-    content: {
-        padding: 20,
-        paddingBottom: 40
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: "bold",
-        marginBottom: 8,
-        color: "#222222"
-    },
-    description: {
-        fontSize: 14,
-        color: "#666666",
-        marginBottom: 15
-    },
-    section: {
-        marginTop: 20,
-        padding: 15,
-        backgroundColor: "#F5F5F5",
-        borderRadius: 10
-    },
-    sectionTitle: {
-        fontSize: 19,
-        fontWeight: "bold",
-        marginBottom: 15,
-        color: "#222222"
-    },
-    fieldContainer: {
-        marginBottom: 15
-    },
-    label: {
-        fontSize: 15,
-        fontWeight: "600",
-        marginBottom: 7,
-        color: "#333333"
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        padding: 12,
-        backgroundColor: "#FFFFFF",
-        fontSize: 15
-    },
-    photoButton: {
-        minHeight: 110,
-        borderWidth: 1,
-        borderColor: "#AAAAAA",
-        borderStyle: "dashed",
-        borderRadius: 8,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#FFFFFF",
-        overflow: "hidden"
-    },
-    photoButtonText: {
-        color: "#555555",
-        fontSize: 14
-    },
-    photoPreview: {
-        width: "100%",
-        height: 180,
-        resizeMode: "cover"
-    },
-    dateButton: {
-        padding: 13,
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        backgroundColor: "#FFFFFF"
-    },
-    dateButtonText: {
-        color: "#333333",
-        fontSize: 15
-    },
-    error: {
-        color: "#D32F2F",
-        fontSize: 12,
-        marginTop: 5
-    },
-    commissionContainer: {
-        padding: 12,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 8,
-        marginBottom: 15
-    },
-    commissionText: {
-        fontSize: 14,
-        color: "#333333",
-        marginVertical: 4
-    },
-    termsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10
-    },
-    checkbox: {
-        width: 23,
-        height: 23,
-        borderWidth: 1,
-        borderColor: "#777777",
-        borderRadius: 4,
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    checkboxChecked: {
-        backgroundColor: "#2878D0",
-        borderColor: "#2878D0"
-    },
-    checkmark: {
-        color: "#FFFFFF",
-        fontWeight: "bold"
-    },
-    termsText: {
-        flex: 1,
-        fontSize: 14,
-        color: "#333333"
-    },
-    modalBackground: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        padding: 20
-    },
-    dateModal: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 12,
-        padding: 15,
-        alignItems: "center"
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 10
-    },
-    modalButton: {
-        backgroundColor: "#2878D0",
-        padding: 12,
-        borderRadius: 8,
-        alignSelf: "stretch",
-        alignItems: "center",
-        marginTop: 10
-    },
-    modalButtonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold"
-    },
-    continueButton: {
-        backgroundColor: "#2878D0",
-        padding: 16,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 25
-    },
-    continueButtonText: {
-        color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "bold"
-    }
-});

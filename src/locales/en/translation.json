@@ -15,7 +15,8 @@
         "title": "Welcome",
         "email": "Email",
         "password": "Password",
-        "button": "Sign in"
+        "button": "Sign in",
+        "registerLink": "Don't have an account? Sign up"
     },
     "register": {
         "title": "Driver registration",

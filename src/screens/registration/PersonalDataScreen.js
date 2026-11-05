@@ -1,16 +1,20 @@
+
 import { useState } from "react";
 import {
     View,
     Text,
     TextInput,
     ScrollView,
-    Button,
     Pressable,
-    Image
+    Image,
+    StyleSheet
 } from "react-native";
+
 import * as ImagePicker from "expo-image-picker";
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 // Convierte una fecha guardada en texto a un objeto Date.
@@ -107,15 +111,108 @@ function validatePersonalData(data) {
     };
 }
 
-export default function PersonalDataScreen({ navigation }) {    
+export default function PersonalDataScreen({ navigation }) {
+
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
+
+    const { colors } = useTheme();
+    const { language: appLanguage, changeLanguage: changeAppLanguage } = useLanguage();
 
     const validation = validatePersonalData(formData);
     const isFormValid = Object.values(validation).every(Boolean);
 
     const [touched, setTouched] = useState({});
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showErrors, setShowErrors] = useState(false);
 
+    // Estilos dinámicos según el tema seleccionado.
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background
+        },
+        content: {
+            padding: 20,
+            paddingBottom: 40,
+            gap: 10
+        },
+        label: {
+            color: colors.text,
+            fontSize: 16,
+            fontWeight: "600",
+            marginTop: 12
+        },
+        input: {
+            backgroundColor: colors.surface,
+            color: colors.text,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 10,
+            padding: 12,
+            fontSize: 16
+        },
+        placeholder: {
+            color: colors.secondaryText
+        },
+        error: {
+            color: "#EF4444",
+            fontSize: 13
+        },
+        button: {
+            backgroundColor: colors.primary,
+            padding: 14,
+            borderRadius: 10,
+            alignItems: "center",
+            justifyContent: "center",
+            marginVertical: 5
+        },
+        buttonText: {
+            color: "#FFFFFF",
+            fontSize: 16,
+            fontWeight: "bold"
+        },
+        photoPlaceholder: {
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            justifyContent: "center",
+            alignItems: "center"
+        },
+        photoPlaceholderText: {
+            fontSize: 30,
+            color: colors.secondaryText
+        },
+        option: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 8,
+            gap: 10
+        },
+        radioOuter: {
+            width: 22,
+            height: 22,
+            borderRadius: 11,
+            borderWidth: 2,
+            justifyContent: "center",
+            alignItems: "center"
+        },
+        radioInner: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: colors.primary
+        },
+        optionText: {
+            color: colors.text,
+            fontSize: 15
+        }
+    });
+
+    // Cambia de pantalla cuando todos los campos son válidos.
     const handleContinue = () => {
         setShowErrors(true);
 
@@ -138,19 +235,17 @@ export default function PersonalDataScreen({ navigation }) {
         { label: "personalData.language.english", value: "en" }
     ];
 
-    const changeLanguage = (language) => {
+    // Actualiza el idioma del formulario y de toda la aplicación.
+    const changeLanguage = async (language) => {
         updateFormData("language", language);
-        i18n.changeLanguage(language);
+        await changeAppLanguage(language);
     };
 
-    const [showDatePicker, setShowDatePicker] = useState(false);
-
-    const [showErrors, setShowErrors] = useState(false);
     // Calculamos la fecha máxima permitida para tener 18 años.
     const maxBirthDate = new Date();
     maxBirthDate.setFullYear(maxBirthDate.getFullYear() - 18);
 
-    // Recuperamos la fecha que el usuario haya seleccionado anteriormente.
+    // Recuperamos la fecha seleccionada anteriormente.
     const selectedBirthDate = parseBirthDate(formData.birthDate);
 
     // Preparamos la fecha para mostrarla en pantalla.
@@ -158,6 +253,7 @@ export default function PersonalDataScreen({ navigation }) {
         ? formatBirthDate(formData.birthDate, i18n.language)
         : t("personalData.birthDatePlaceholder");
 
+    // Selección de fotografía.
     const pickImage = async () => {
         const permission =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -179,18 +275,28 @@ export default function PersonalDataScreen({ navigation }) {
     };
 
     return (
-        <ScrollView>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+        >
             <View>
 
-                <Text>{t("personalData.profilePhoto")}</Text>
-                <Pressable onPress={() => {
+                {/* Fotografía de perfil */}
+                <Text style={styles.label}>
+                    {t("personalData.profilePhoto")}
+                </Text>
+
+                <Pressable
+                    onPress={() => {
                         setTouched(previous => ({
                             ...previous,
                             profilePhoto: true
                         }));
 
                         pickImage();
-                    }}>
+                    }}
+                    style={{ alignSelf: "center", marginVertical: 10 }}
+                >
                     {formData.profilePhoto ? (
                         <Image
                             source={{ uri: formData.profilePhoto }}
@@ -201,23 +307,14 @@ export default function PersonalDataScreen({ navigation }) {
                             }}
                         />
                     ) : (
-                        <View
-                            style={{
-                                width: 120,
-                                height: 120,
-                                borderRadius: 60,
-                                backgroundColor: "#DDDDDD",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}
-                        >
-                            <Text>+</Text>
+                        <View style={styles.photoPlaceholder}>
+                            <Text style={styles.photoPlaceholderText}>+</Text>
                         </View>
                     )}
                 </Pressable>
 
-                <Button
-                    title={t("personalData.changePhoto")}
+                <Pressable
+                    style={styles.button}
                     onPress={() => {
                         setTouched(previous => ({
                             ...previous,
@@ -226,16 +323,27 @@ export default function PersonalDataScreen({ navigation }) {
 
                         pickImage();
                     }}
-                />
-                {(showErrors || touched.profilePhoto ) && !validation.profilePhoto && (
-                    <Text style={{ color: "red" }}>
+                >
+                    <Text style={styles.buttonText}>
+                        {t("personalData.changePhoto")}
+                    </Text>
+                </Pressable>
+
+                {(showErrors || touched.profilePhoto) && !validation.profilePhoto && (
+                    <Text style={styles.error}>
                         {t("personalData.errors.profilePhoto")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.fullName")}</Text>
+                {/* Nombre completo */}
+                <Text style={styles.label}>
+                    {t("personalData.fullName")}
+                </Text>
+
                 <TextInput
+                    style={styles.input}
                     placeholder={t("personalData.fullNamePlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
                     value={formData.fullName || ""}
                     maxLength={50}
                     onChangeText={(text) => {
@@ -248,15 +356,22 @@ export default function PersonalDataScreen({ navigation }) {
                         }));
                     }}
                 />
+
                 {(showErrors || touched.fullName) && !validation.fullName && (
-                    <Text style={{ color: "red" }}>
+                    <Text style={styles.error}>
                         {t("personalData.errors.fullName")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.documentNumber")}</Text>
+                {/* Documento */}
+                <Text style={styles.label}>
+                    {t("personalData.documentNumber")}
+                </Text>
+
                 <TextInput
+                    style={styles.input}
                     placeholder={t("personalData.documentNumberPlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
                     keyboardType="numeric"
                     maxLength={10}
                     value={formData.documentNumber || ""}
@@ -273,15 +388,22 @@ export default function PersonalDataScreen({ navigation }) {
                         }));
                     }}
                 />
+
                 {(showErrors || touched.documentNumber) && !validation.documentNumber && (
-                    <Text style={{ color: "red" }}>
+                    <Text style={styles.error}>
                         {t("personalData.errors.documentNumber")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.phone")}</Text>
+                {/* Teléfono */}
+                <Text style={styles.label}>
+                    {t("personalData.phone")}
+                </Text>
+
                 <TextInput
+                    style={styles.input}
                     placeholder={t("personalData.phonePlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
                     keyboardType="phone-pad"
                     maxLength={10}
                     value={formData.phone || ""}
@@ -298,15 +420,22 @@ export default function PersonalDataScreen({ navigation }) {
                         }));
                     }}
                 />
-                {(showErrors || touched.phone ) && !validation.phone && (
-                    <Text style={{ color: "red" }}>
+
+                {(showErrors || touched.phone) && !validation.phone && (
+                    <Text style={styles.error}>
                         {t("personalData.errors.phone")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.email")}</Text>
+                {/* Correo electrónico */}
+                <Text style={styles.label}>
+                    {t("personalData.email")}
+                </Text>
+
                 <TextInput
+                    style={styles.input}
                     placeholder={t("personalData.emailPlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={formData.email || ""}
@@ -320,15 +449,20 @@ export default function PersonalDataScreen({ navigation }) {
                         }));
                     }}
                 />
-                {(showErrors || touched.email ) && !validation.email && (
-                    <Text style={{ color: "red" }}>
+
+                {(showErrors || touched.email) && !validation.email && (
+                    <Text style={styles.error}>
                         {t("personalData.errors.email")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.birthDate")}</Text>
-                <Button
-                    title={birthDateDisplay}
+                {/* Fecha de nacimiento */}
+                <Text style={styles.label}>
+                    {t("personalData.birthDate")}
+                </Text>
+
+                <Pressable
+                    style={styles.button}
                     onPress={() => {
                         setTouched(previous => ({
                             ...previous,
@@ -337,7 +471,12 @@ export default function PersonalDataScreen({ navigation }) {
 
                         setShowDatePicker(true);
                     }}
-                />
+                >
+                    <Text style={styles.buttonText}>
+                        {birthDateDisplay}
+                    </Text>
+                </Pressable>
+
                 {showDatePicker && (
                     <DateTimePicker
                         value={selectedBirthDate || maxBirthDate}
@@ -369,13 +508,18 @@ export default function PersonalDataScreen({ navigation }) {
                         }}
                     />
                 )}
-                {(showErrors || touched.birthDate ) && !validation.birthDate && (
-                    <Text style={{ color: "red" }}>
+
+                {(showErrors || touched.birthDate) && !validation.birthDate && (
+                    <Text style={styles.error}>
                         {t("personalData.errors.birthDate")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.gender.title")}</Text>
+                {/* Género */}
+                <Text style={styles.label}>
+                    {t("personalData.gender.title")}
+                </Text>
+
                 {genderOptions.map((option) => (
                     <Pressable
                         key={option.value}
@@ -387,102 +531,100 @@ export default function PersonalDataScreen({ navigation }) {
                                 gender: true
                             }));
                         }}
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            marginVertical: 8,
-                            gap: 10
-                        }}
+                        style={styles.option}
                     >
-                        {/* Circulo exterior */}
                         <View
-                            style={{
-                                width: 22,
-                                height: 22,
-                                borderRadius: 11,
-                                borderWidth: 2,
-                                borderColor: formData.gender === option.value
-                                    ? "#2685D8"
-                                    : "#888",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}
+                            style={[
+                                styles.radioOuter,
+                                {
+                                    borderColor: formData.gender === option.value
+                                        ? colors.primary
+                                        : colors.border
+                                }
+                            ]}
                         >
-                            {/* Circulo interior */}
                             {formData.gender === option.value && (
-                                <View
-                                    style={{
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: 5,
-                                        backgroundColor: "#2685D8"
-                                    }}
-                                />
+                                <View style={styles.radioInner} />
                             )}
                         </View>
 
-                        <Text>{t(option.label)}</Text>
+                        <Text style={styles.optionText}>
+                            {t(option.label)}
+                        </Text>
                     </Pressable>
                 ))}
-                {(showErrors || touched.gender ) && !validation.gender && (
-                    <Text style={{ color: "red" }}>
+
+                {(showErrors || touched.gender) && !validation.gender && (
+                    <Text style={styles.error}>
                         {t("personalData.errors.gender")}
                     </Text>
                 )}
 
-                <Text>{t("personalData.language.title")}</Text>
+                {/* Idioma */}
+                <Text style={styles.label}>
+                    {t("personalData.language.title")}
+                </Text>
 
                 {languageOptions.map((option) => {
                     const isSelected =
                         formData.language === option.value ||
-                        (!formData.language && i18n.language === option.value);
+                        (!formData.language && appLanguage === option.value);
 
                     return (
                         <Pressable
                             key={option.value}
                             onPress={() => changeLanguage(option.value)}
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginVertical: 8,
-                                gap: 10
-                            }}
+                            style={styles.option}
                         >
                             <View
-                                style={{
-                                    width: 22,
-                                    height: 22,
-                                    borderRadius: 11,
-                                    borderWidth: 2,
-                                    borderColor: isSelected ? "#2685D8" : "#888",
-                                    justifyContent: "center",
-                                    alignItems: "center"
-                                }}
+                                style={[
+                                    styles.radioOuter,
+                                    {
+                                        borderColor: isSelected
+                                            ? colors.primary
+                                            : colors.border
+                                    }
+                                ]}
                             >
                                 {isSelected && (
-                                    <View
-                                        style={{
-                                            width: 10,
-                                            height: 10,
-                                            borderRadius: 5,
-                                            backgroundColor: "#2685D8"
-                                        }}
-                                    />
+                                    <View style={styles.radioInner} />
                                 )}
                             </View>
 
-                            <Text>{t(option.label)}</Text>
+                            <Text style={styles.optionText}>
+                                {t(option.label)}
+                            </Text>
                         </Pressable>
                     );
                 })}
 
             </View>
 
-            <Button
-                title={t("register.continue")}
+            {/* Continuar */}
+            <Pressable
+                style={styles.button}
                 onPress={handleContinue}
-                //disabled={!isFormValid} 
-            />
+            >
+                <Text style={styles.buttonText}>
+                    {t("register.continue")}
+                </Text>
+            </Pressable>
+
+            <Pressable
+                style={[
+                    styles.button,
+                    {
+                        backgroundColor: colors.surface,
+                        borderWidth: 1,
+                        borderColor: colors.border
+                    }
+                ]}
+                onPress={() => navigation.getParent()?.navigate("Settings")}
+            >
+                <Text style={[styles.optionText, { fontWeight: "bold" }]}>
+                    {t("settings.title", "Ajustes")} ⚙
+                </Text>
+            </Pressable>
 
         </ScrollView>
     );

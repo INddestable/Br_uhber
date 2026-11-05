@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import {
@@ -5,7 +6,6 @@ import {
     Text,
     TextInput,
     ScrollView,
-    Button,
     Pressable,
     Image,
     StyleSheet
@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
 
 function validateVehicleCategory(category) {
     const validCategories = ["economy", "xl", "premium"];
@@ -50,12 +51,12 @@ function validateVehicleCapacity(capacity, category) {
 }
 
 function validateVehicleYear(year) {
-  const yearRegex = /^\d{4}$/;
+    const yearRegex = /^\d{4}$/;
 
-  return (
-    yearRegex.test(String(year)) &&
-    Number(year) <= new Date().getFullYear()//+1
-  );
+    return (
+        yearRegex.test(String(year)) &&
+        Number(year) <= new Date().getFullYear()
+    );
 }
 
 function validateVehiclePhoto(photo) {
@@ -81,15 +82,120 @@ function validateVehicleData(data) {
 export default function VehicleScreen({ navigation }) {
     const { t } = useTranslation();
     const { formData, updateFormData } = useRegistration();
+    const { colors } = useTheme();
 
     const validation = validateVehicleData(formData);
-
     const isFormValid = Object.values(validation).every(Boolean);
 
     const [touched, setTouched] = useState({});
     const [showErrors, setShowErrors] = useState(false);
-
     const [openDropdown, setOpenDropdown] = useState(null);
+
+    // Estilos dinámicos según el tema seleccionado.
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background
+        },
+        content: {
+            padding: 20,
+            paddingBottom: 40
+        },
+        label: {
+            fontSize: 15,
+            fontWeight: "600",
+            marginBottom: 8,
+            marginTop: 15,
+            color: colors.text
+        },
+        dropdown: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            padding: 14,
+            backgroundColor: colors.card
+        },
+        dropdownText: {
+            fontSize: 15,
+            color: colors.text
+        },
+        arrow: {
+            fontSize: 20,
+            color: colors.secondaryText
+        },
+        dropdownList: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            marginTop: 4,
+            backgroundColor: colors.card,
+            overflow: "hidden"
+        },
+        dropdownOption: {
+            padding: 14,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border
+        },
+        selectedOption: {
+            backgroundColor: colors.surface
+        },
+        error: {
+            color: "#EF4444",
+            fontSize: 12,
+            marginTop: 5
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            padding: 14,
+            fontSize: 15,
+            backgroundColor: colors.card,
+            color: colors.text
+        },
+        vehiclePhoto: {
+            width: "100%",
+            height: 200,
+            resizeMode: "contain",
+            marginTop: 10,
+            backgroundColor: colors.surface,
+            borderRadius: 8
+        },
+        description: {
+            color: colors.secondaryText,
+            fontSize: 14,
+            marginBottom: 8
+        },
+        continueButton: {
+            backgroundColor: colors.primary,
+            padding: 16,
+            borderRadius: 10,
+            alignItems: "center",
+            marginTop: 25
+        },
+        continueButtonText: {
+            color: "#FFFFFF",
+            fontSize: 16,
+            fontWeight: "bold"
+        },
+        settingsButton: {
+            alignSelf: "flex-end",
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+            borderRadius: 8,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            marginBottom: 10
+        },
+        settingsButtonText: {
+            color: colors.text,
+            fontWeight: "600"
+        }
+    });
 
     const categoryOptions = [
         { label: t("vehicle.categories.economy"), value: "economy" },
@@ -107,6 +213,7 @@ export default function VehicleScreen({ navigation }) {
         { label: t("vehicle.colors.other"), value: "other" }
     ];
 
+    // Selección de fotografía del vehículo.
     const pickVehiclePhoto = async () => {
         const permission =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -124,6 +231,11 @@ export default function VehicleScreen({ navigation }) {
 
         if (!result.canceled) {
             updateFormData("vehiclePhoto", result.assets[0].uri);
+
+            setTouched(previous => ({
+                ...previous,
+                vehiclePhoto: true
+            }));
         }
     };
 
@@ -137,10 +249,26 @@ export default function VehicleScreen({ navigation }) {
         navigation.navigate("Documents");
     };
 
-return (
-    <ScrollView>
-        <View>
-            <Text style={styles.label}>{t("vehicle.category")}</Text>
+    return (
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+        >
+            {/* Acceso a ajustes */}
+            <Pressable
+                style={styles.settingsButton}
+                onPress={() => navigation.getParent()?.navigate("Settings")}
+            >
+                <Text style={styles.settingsButtonText}>
+                    {t("settings.title", "Ajustes")} ⚙
+                </Text>
+            </Pressable>
+
+            {/* CATEGORÍA */}
+            <Text style={styles.label}>
+                {t("vehicle.category")}
+            </Text>
 
             <Pressable
                 style={styles.dropdown}
@@ -199,60 +327,71 @@ return (
                 )
             }
 
-            <Text style={styles.label}>{t("vehicle.color")}</Text>
+            {/* COLOR */}
+            <Text style={styles.label}>
+                {t("vehicle.color")}
+            </Text>
+
             <Pressable
-            style={styles.dropdown}
-            onPress={() => {
-                setOpenDropdown(openDropdown === "color" ? null : "color");
+                style={styles.dropdown}
+                onPress={() => {
+                    setOpenDropdown(
+                        openDropdown === "color" ? null : "color"
+                    );
 
-                setTouched(previous => ({
-                ...previous,
-                vehicleColor: true
-                }));
-            }}
+                    setTouched(previous => ({
+                        ...previous,
+                        vehicleColor: true
+                    }));
+                }}
             >
-            <Text style={styles.dropdownText}>
-                {colorOptions.find(
-                option => option.value === formData.vehicleColor
-                )?.label || t("vehicle.colorPlaceholder")}
-            </Text>
+                <Text style={styles.dropdownText}>
+                    {colorOptions.find(
+                        option => option.value === formData.vehicleColor
+                    )?.label || t("vehicle.colorPlaceholder")}
+                </Text>
 
-            <Text style={styles.arrow}>
-                {openDropdown === "color" ? "⌃" : "⌄"}
-            </Text>
+                <Text style={styles.arrow}>
+                    {openDropdown === "color" ? "⌃" : "⌄"}
+                </Text>
             </Pressable>
 
             {openDropdown === "color" && (
-            <View style={styles.dropdownList}>
-                {colorOptions.map(option => (
-                <Pressable
-                    key={option.value}
-                    style={[
-                    styles.dropdownOption,
-                    formData.vehicleColor === option.value &&
-                        styles.selectedOption
-                    ]}
-                    onPress={() => {
-                    updateFormData("vehicleColor", option.value);
-                    setOpenDropdown(null);
-                    }}
-                >
-                    <Text style={styles.dropdownText}>
-                    {option.label}
-                    </Text>
-                </Pressable>
-                ))}
-            </View>
+                <View style={styles.dropdownList}>
+                    {colorOptions.map(option => (
+                        <Pressable
+                            key={option.value}
+                            style={[
+                                styles.dropdownOption,
+                                formData.vehicleColor === option.value &&
+                                    styles.selectedOption
+                            ]}
+                            onPress={() => {
+                                updateFormData("vehicleColor", option.value);
+                                setOpenDropdown(null);
+                            }}
+                        >
+                            <Text style={styles.dropdownText}>
+                                {option.label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
             )}
 
             {(showErrors || touched.vehicleColor) &&
-            !validation.vehicleColor && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.color")}
-                </Text>
-            )}
+                !validation.vehicleColor && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.color")}
+                    </Text>
+                )
+            }
 
-            <Text style={styles.label}>{t("vehicle.plate")}</Text>
+            {/* PLACA */}
+            <Text style={styles.label}>
+                {t("vehicle.plate")}
+            </Text>
+
             <TextInput
                 style={styles.input}
                 value={formData.vehiclePlate || ""}
@@ -261,23 +400,29 @@ return (
                 }
                 onBlur={() =>
                     setTouched(previous => ({
-                    ...previous,
-                    vehiclePlate: true
+                        ...previous,
+                        vehiclePlate: true
                     }))
                 }
                 placeholder={t("vehicle.platePlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 maxLength={6}
                 autoCapitalize="characters"
             />
 
-                {(showErrors || touched.vehiclePlate) &&
+            {(showErrors || touched.vehiclePlate) &&
                 !validation.vehiclePlate && (
                     <Text style={styles.error}>
-                    {t("vehicle.errors.plate")}
+                        {t("vehicle.errors.plate")}
                     </Text>
-                )}
+                )
+            }
 
-            <Text style={styles.label}>{t("vehicle.brand")}</Text>
+            {/* MARCA */}
+            <Text style={styles.label}>
+                {t("vehicle.brand")}
+            </Text>
+
             <TextInput
                 style={styles.input}
                 value={formData.vehicleBrand || ""}
@@ -286,21 +431,28 @@ return (
                 }
                 onBlur={() =>
                     setTouched(previous => ({
-                    ...previous,
-                    vehicleBrand: true
+                        ...previous,
+                        vehicleBrand: true
                     }))
                 }
                 placeholder={t("vehicle.brandPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 maxLength={30}
             />
 
-            {(showErrors || touched.vehicleBrand) && !validation.vehicleBrand && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.brand")}
-                </Text>
-            )}
+            {(showErrors || touched.vehicleBrand) &&
+                !validation.vehicleBrand && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.brand")}
+                    </Text>
+                )
+            }
 
-            <Text style={styles.label}>{t("vehicle.model")}</Text>
+            {/* MODELO */}
+            <Text style={styles.label}>
+                {t("vehicle.model")}
+            </Text>
+
             <TextInput
                 style={styles.input}
                 value={formData.vehicleModel || ""}
@@ -309,49 +461,62 @@ return (
                 }
                 onBlur={() =>
                     setTouched(previous => ({
-                    ...previous,
-                    vehicleModel: true
+                        ...previous,
+                        vehicleModel: true
                     }))
                 }
                 placeholder={t("vehicle.modelPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 maxLength={30}
             />
 
             {(showErrors || touched.vehicleModel) &&
-            !validation.vehicleModel && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.model")}
-                </Text>
-            )}
+                !validation.vehicleModel && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.model")}
+                    </Text>
+                )
+            }
 
-            <Text style={styles.label}>{t("vehicle.year")}</Text>
+            {/* AÑO */}
+            <Text style={styles.label}>
+                {t("vehicle.year")}
+            </Text>
+
             <TextInput
                 style={styles.input}
                 value={formData.vehicleYear || ""}
                 onChangeText={text =>
                     updateFormData(
-                    "vehicleYear",
-                    text.replace(/\D/g, "")
+                        "vehicleYear",
+                        text.replace(/\D/g, "")
                     )
                 }
                 onBlur={() =>
                     setTouched(previous => ({
-                    ...previous,
-                    vehicleYear: true
+                        ...previous,
+                        vehicleYear: true
                     }))
                 }
                 placeholder={t("vehicle.yearPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 keyboardType="numeric"
                 maxLength={4}
             />
 
-            {(showErrors || touched.vehicleYear) && !validation.vehicleYear && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.year")}
-                </Text>
-            )}
+            {(showErrors || touched.vehicleYear) &&
+                !validation.vehicleYear && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.year")}
+                    </Text>
+                )
+            }
 
-            <Text style={styles.label}>{t("vehicle.capacity")}</Text>
+            {/* CAPACIDAD */}
+            <Text style={styles.label}>
+                {t("vehicle.capacity")}
+            </Text>
+
             <TextInput
                 style={styles.input}
                 value={formData.vehicleCapacity || ""}
@@ -363,26 +528,29 @@ return (
                 }
                 onBlur={() =>
                     setTouched(previous => ({
-                    ...previous,
-                    vehicleCapacity: true
+                        ...previous,
+                        vehicleCapacity: true
                     }))
                 }
                 placeholder={t("vehicle.capacityPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 keyboardType="numeric"
             />
 
             {(showErrors || touched.vehicleCapacity) &&
-            !validation.vehicleCapacity && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.capacity")}
-                </Text>
-            )}
+                !validation.vehicleCapacity && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.capacity")}
+                    </Text>
+                )
+            }
 
+            {/* FOTOGRAFÍA DEL VEHÍCULO */}
             <Text style={styles.label}>
                 {t("vehicle.photo")}
             </Text>
 
-            <Text>
+            <Text style={styles.description}>
                 {t("vehicle.photoDescription")}
             </Text>
 
@@ -390,104 +558,38 @@ return (
                 style={styles.dropdown}
                 onPress={pickVehiclePhoto}
             >
-            <Text style={styles.dropdownText}>
-                {formData.vehiclePhoto
-                ? t("vehicle.changePhoto")
-                : t("vehicle.selectPhoto")}
-            </Text>
+                <Text style={styles.dropdownText}>
+                    {formData.vehiclePhoto
+                        ? t("vehicle.changePhoto")
+                        : t("vehicle.selectPhoto")}
+                </Text>
             </Pressable>
-                {formData.vehiclePhoto && (
+
+            {formData.vehiclePhoto && (
                 <Image
                     source={{ uri: formData.vehiclePhoto }}
                     style={styles.vehiclePhoto}
-            />
+                />
             )}
 
             {(showErrors || touched.vehiclePhoto) &&
-            !validation.vehiclePhoto && (
-                <Text style={styles.error}>
-                {t("vehicle.errors.photo")}
-                </Text>
-            )}
+                !validation.vehiclePhoto && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.photo")}
+                    </Text>
+                )
+            }
 
-            <Button
-                title={t("register.continue")}
+            {/* CONTINUAR */}
+            <Pressable
+                style={styles.continueButton}
                 onPress={handleContinue}
-            />
+            >
+                <Text style={styles.continueButtonText}>
+                    {t("register.continue")}
+                </Text>
+            </Pressable>
 
-        </View>
-    </ScrollView>
-);
+        </ScrollView>
+    );
 }
-
-const styles = StyleSheet.create({
-    label: {
-        fontSize: 15,
-        fontWeight: "600",
-        marginBottom: 8,
-        color: "#222"
-    },
-
-    dropdown: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        padding: 14,
-        backgroundColor: "#FFFFFF"
-    },
-
-    dropdownText: {
-        fontSize: 15,
-        color: "#222222"
-    },
-
-    arrow: {
-        fontSize: 20,
-        color: "#666666"
-    },
-
-    dropdownList: {
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        marginTop: 4,
-        backgroundColor: "#FFFFFF",
-        overflow: "hidden"
-    },
-
-    dropdownOption: {
-        padding: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: "#EEEEEE"
-    },
-
-    selectedOption: {
-        backgroundColor: "#EEEEEE"
-    },
-
-    error: {
-        color: "red",
-        fontSize: 12,
-        marginTop: 5
-    },
-
-    input: {
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        padding: 14,
-        fontSize: 15,
-        backgroundColor: "#FFFFFF",
-        color: "#222222"
-    },
-
-    vehiclePhoto: {
-        width: "100%",
-        height: 200,
-        resizeMode: "contain",
-        marginTop: 10
-    }
-});

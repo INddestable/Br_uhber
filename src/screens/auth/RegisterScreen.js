@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+
 import {
     View,
     Text,
@@ -10,9 +10,12 @@ import {
 
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function RegisterScreen({ navigation }) {
     const { t } = useTranslation();
+    const { colors } = useTheme();
+
     const { formData, updateFormData } = useRegistration();
 
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,6 +23,7 @@ export default function RegisterScreen({ navigation }) {
     const password = formData.password || "";
 
     const passwordValid = password.length >= 6;
+
     const passwordsMatch =
         password.length > 0 && password === confirmPassword;
 
@@ -31,8 +35,81 @@ export default function RegisterScreen({ navigation }) {
         navigation.getParent().navigate("Registration");
     }
 
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            justifyContent: "center",
+            padding: 24,
+            backgroundColor: colors.background
+        },
+        settingsButton: {
+            position: "absolute",
+            top: 55,
+            right: 25,
+            padding: 10,
+            borderRadius: 8,
+            backgroundColor: colors.card
+        },
+        settingsButtonText: {
+            color: colors.text,
+            fontSize: 14
+        },
+        title: {
+            fontSize: 26,
+            fontWeight: "bold",
+            marginBottom: 25,
+            color: colors.text
+        },
+        label: {
+            fontSize: 15,
+            fontWeight: "600",
+            marginBottom: 7,
+            color: colors.text
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            padding: 13,
+            marginBottom: 18,
+            backgroundColor: colors.surface,
+            color: colors.text
+        },
+        error: {
+            color: "#D32F2F",
+            fontSize: 12,
+            marginTop: -12,
+            marginBottom: 12
+        },
+        button: {
+            backgroundColor: colors.primary,
+            padding: 16,
+            borderRadius: 10,
+            alignItems: "center",
+            marginTop: 10
+        },
+        buttonDisabled: {
+            opacity: 0.45
+        },
+        buttonText: {
+            color: "#FFFFFF",
+            fontWeight: "bold",
+            fontSize: 16
+        }
+    });
+
     return (
         <View style={styles.container}>
+
+            <Pressable
+                style={styles.settingsButton}
+                onPress={() => navigation.getParent()?.navigate("Settings")}
+            >
+                <Text style={styles.settingsButtonText}>
+                    {t("settings.title", "Ajustes")} ⚙
+                </Text>
+            </Pressable>
+
             <Text style={styles.title}>
                 {t("auth.register.title")}
             </Text>
@@ -48,6 +125,7 @@ export default function RegisterScreen({ navigation }) {
                     updateFormData("password", value)
                 }
                 placeholder={t("auth.register.passwordPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 secureTextEntry
                 autoCapitalize="none"
             />
@@ -67,6 +145,7 @@ export default function RegisterScreen({ navigation }) {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder={t("auth.register.confirmPasswordPlaceholder")}
+                placeholderTextColor={colors.secondaryText}
                 secureTextEntry
                 autoCapitalize="none"
             />
@@ -90,56 +169,7 @@ export default function RegisterScreen({ navigation }) {
                     {t("auth.register.continue")}
                 </Text>
             </Pressable>
+
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        padding: 24,
-        backgroundColor: "#FFFFFF"
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: "bold",
-        marginBottom: 25,
-        color: "#222222"
-    },
-    label: {
-        fontSize: 15,
-        fontWeight: "600",
-        marginBottom: 7,
-        color: "#333333"
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "#CCCCCC",
-        borderRadius: 8,
-        padding: 13,
-        marginBottom: 18,
-        backgroundColor: "#FFFFFF"
-    },
-    error: {
-        color: "#D32F2F",
-        fontSize: 12,
-        marginTop: -12,
-        marginBottom: 12
-    },
-    button: {
-        backgroundColor: "#2878D0",
-        padding: 16,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 10
-    },
-    buttonDisabled: {
-        opacity: 0.45
-    },
-    buttonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        fontSize: 16
-    }
-});
