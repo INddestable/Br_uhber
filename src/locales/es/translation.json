@@ -1,19 +1,30 @@
 {
-  "login": {
-    "title": "Bienvenido",
-    "email": "Correo electrónico",
-    "password": "Contraseña",
-    "button": "Iniciar sesión"
-  },
-  "register": {
-    "title": "Registro de conductor",
-    "personal": "Datos personales",
-    "vehicle": "Vehículo",
-    "documents": "Documentos",
-    "submit": "Enviar registro"
-  },
-  "pending": {
-    "title": "Registro en revisión",
-    "description": "Estamos verificando tus documentos."
-  }
+    "login": {
+        "title": "Bienvenido",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "button": "Iniciar sesión"
+    },
+    "register": {
+        "title": "Registro de conductor",
+        "personal": "Datos personales",
+        "vehicle": "Vehículo",
+        "documents": "Documentos",
+        "submit": "Enviar registro"
+    },
+    "personalData": {
+        "title": "Datos personales",
+        "fullName": "Nombre completo",
+        "fullNamePlaceholder": "Escribe tu nombre completo",
+        "documentNumber": "Documento de identidad",
+        "documentNumberPlaceholder": "Número de documento",
+        "phone": "Teléfono",
+        "phonePlaceholder": "Número de teléfono",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "ejemplo@correo.com"
+    },
+    "pending": {
+        "title": "Registro en revisión",
+        "description": "Estamos verificando tus documentos."
+    }
 }

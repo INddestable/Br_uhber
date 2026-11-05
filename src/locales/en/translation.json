@@ -1,19 +1,30 @@
 {
-  "login": {
-    "title": "Welcome",
-    "email": "Email",
-    "password": "Password",
-    "button": "Sign in"
-  },
-  "register": {
-    "title": "Driver registration",
-    "personal": "Personal information",
-    "vehicle": "Vehicle",
-    "documents": "Documents",
-    "submit": "Submit registration"
-  },
-  "pending": {
-    "title": "Registration under review",
-    "description": "We are verifying your documents."
-  }
+    "login": {
+        "title": "Welcome",
+        "email": "Email",
+        "password": "Password",
+        "button": "Sign in"
+    },
+    "register": {
+        "title": "Driver registration",
+        "personal": "Personal information",
+        "vehicle": "Vehicle",
+        "documents": "Documents",
+        "submit": "Submit registration"
+    },
+    "personalData": {
+        "title": "Personal information",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "Enter your full name",
+        "documentNumber": "Identity document",
+        "documentNumberPlaceholder": "Document number",
+        "phone": "Phone number",
+        "phonePlaceholder": "Enter your phone number",
+        "email": "Email address",
+        "emailPlaceholder": "example@email.com"
+    },
+    "pending": {
+        "title": "Registration under review",
+        "description": "We are verifying your documents."
+    }
 }
