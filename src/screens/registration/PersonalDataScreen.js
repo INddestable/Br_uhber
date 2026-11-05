@@ -159,6 +159,13 @@ export default function PersonalDataScreen({ navigation }) {
         : t("personalData.birthDatePlaceholder");
 
     const pickImage = async () => {
+        const permission =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permission.granted) {
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ["images"],
             allowsEditing: true,

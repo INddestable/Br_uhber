@@ -80,7 +80,8 @@
             "brand": "Ingresa la marca del vehículo.",
             "model": "Ingresa el modelo del vehículo.",
             "year": "Ingresa un año válido de cuatro dígitos.",
-            "capacity": "La capacidad debe ser de al menos 6 pasajeros para XL y 1 para las demás categorías."
+            "capacity": "La capacidad debe ser de al menos 6 pasajeros para XL y 1 para las demás categorías.",
+            "photo": "Debes seleccionar una fotografía del vehículo."
         },
         "plate": "Placa del vehículo",
         "platePlaceholder": "Ej. ABC123",
@@ -91,6 +92,10 @@
         "year": "Año del vehículo",
         "yearPlaceholder": "Ej. 2022",
         "capacity": "Capacidad de pasajeros",
-        "capacityPlaceholder": "Ej. 4"
+        "capacityPlaceholder": "Ej. 4",
+        "photo": "Fotografía del vehículo",
+        "photoDescription": "Selecciona una fotografía donde se pueda observar claramente la placa del vehículo.",
+        "selectPhoto": "Seleccionar fotografía",
+        "changePhoto": "Cambiar fotografía"
     }
 }

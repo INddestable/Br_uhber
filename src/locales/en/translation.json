@@ -80,7 +80,8 @@
             "brand": "Enter the vehicle brand.",
             "model": "Enter the vehicle model.",
             "year": "Enter a valid four-digit year.",
-            "capacity": "Capacity must be at least 6 passengers for XL and 1 for other categories."
+            "capacity": "Capacity must be at least 6 passengers for XL and 1 for other categories.",
+            "photo": "You must select a photograph of the vehicle."
         },
         "plate": "Vehicle license plate",
         "platePlaceholder": "E.g. ABC123",
@@ -91,6 +92,10 @@
         "year": "Vehicle year",
         "yearPlaceholder": "E.g. 2022",
         "capacity": "Passenger capacity",
-        "capacityPlaceholder": "E.g. 4"
+        "capacityPlaceholder": "E.g. 4",
+        "photo": "Vehicle photograph",
+        "photoDescription": "Select a photograph where the vehicle's license plate is clearly visible.",
+        "selectPhoto": "Select photograph",
+        "changePhoto": "Change photograph"
     }
 }

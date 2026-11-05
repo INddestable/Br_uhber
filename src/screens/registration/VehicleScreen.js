@@ -107,6 +107,27 @@ export default function VehicleScreen({ navigation }) {
         { label: t("vehicle.colors.other"), value: "other" }
     ];
 
+    const pickVehiclePhoto = async () => {
+        const permission =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permission.granted) {
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.8
+        });
+
+        if (!result.canceled) {
+            updateFormData("vehiclePhoto", result.assets[0].uri);
+        }
+    };
+
+
 return (
     <ScrollView>
         <View>
@@ -348,6 +369,38 @@ return (
                 </Text>
             )}
 
+            <Text style={styles.label}>
+                {t("vehicle.photo")}
+            </Text>
+
+            <Text>
+                {t("vehicle.photoDescription")}
+            </Text>
+
+            <Pressable
+                style={styles.dropdown}
+                onPress={pickVehiclePhoto}
+            >
+            <Text style={styles.dropdownText}>
+                {formData.vehiclePhoto
+                ? t("vehicle.changePhoto")
+                : t("vehicle.selectPhoto")}
+            </Text>
+            </Pressable>
+                {formData.vehiclePhoto && (
+                <Image
+                    source={{ uri: formData.vehiclePhoto }}
+                    style={styles.vehiclePhoto}
+            />
+            )}
+
+            {(showErrors || touched.vehiclePhoto) &&
+            !validation.vehiclePhoto && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.photo")}
+                </Text>
+            )}
+
         </View>
     </ScrollView>
 );
@@ -416,4 +469,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         color: "#222222"
     },
+
+    vehiclePhoto: {
+        width: "100%",
+        height: 200,
+        resizeMode: "contain",
+        marginTop: 10
+    }
 });
