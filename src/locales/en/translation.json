@@ -21,7 +21,9 @@
         "phone": "Phone number",
         "phonePlaceholder": "Enter your phone number",
         "email": "Email address",
-        "emailPlaceholder": "example@email.com"
+        "emailPlaceholder": "example@email.com",
+        "birthDate": "Date of birth",
+        "birthDatePlaceholder": "Select date"
     },
     "pending": {
         "title": "Registration under review",

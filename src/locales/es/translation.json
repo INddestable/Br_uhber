@@ -21,7 +21,9 @@
         "phone": "Teléfono",
         "phonePlaceholder": "Número de teléfono",
         "email": "Correo electrónico",
-        "emailPlaceholder": "ejemplo@correo.com"
+        "emailPlaceholder": "ejemplo@correo.com",
+        "birthDate": "Fecha de nacimiento",
+        "birthDatePlaceholder": "Seleccionar fecha"
     },
     "pending": {
         "title": "Registro en revisión",
