@@ -474,7 +474,7 @@ export default function PersonalDataScreen({ navigation }) {
             <Button
                 title={t("register.continue")}
                 onPress={handleContinue}
-                disabled={!isFormValid}
+                disabled={!isFormValid} 
             />
 
         </ScrollView>

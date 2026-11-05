@@ -52,5 +52,30 @@
     "pending": {
         "title": "Registration under review",
         "description": "We are verifying your documents."
+    },
+    "vehicle": {
+        "title": "Vehicle information",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "categories": {
+            "economy": "Economy",
+            "xl": "XL",
+            "premium": "Premium"
+        },
+        "color": "Vehicle color",
+        "colorPlaceholder": "Select a color",
+        "colors": {
+            "white": "White",
+            "black": "Black",
+            "gray": "Gray",
+            "red": "Red",
+            "blue": "Blue",
+            "silver": "Silver",
+            "other": "Other"
+        },
+        "errors": {
+            "category": "Select a valid category.",
+            "color": "Select a color."
+        }
     }
 }

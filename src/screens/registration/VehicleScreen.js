@@ -7,7 +7,8 @@ import {
     ScrollView,
     Button,
     Pressable,
-    Image
+    Image,
+    StyleSheet
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
@@ -88,9 +89,196 @@ export default function VehicleScreen({ navigation }) {
     const [touched, setTouched] = useState({});
     const [showErrors, setShowErrors] = useState(false);
 
-    return (
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+    const categoryOptions = [
+        { label: t("vehicle.categories.economy"), value: "economy" },
+        { label: t("vehicle.categories.xl"), value: "xl" },
+        { label: t("vehicle.categories.premium"), value: "premium" }
+    ];
+
+    const colorOptions = [
+        { label: t("vehicle.colors.white"), value: "white" },
+        { label: t("vehicle.colors.black"), value: "black" },
+        { label: t("vehicle.colors.gray"), value: "gray" },
+        { label: t("vehicle.colors.red"), value: "red" },
+        { label: t("vehicle.colors.blue"), value: "blue" },
+        { label: t("vehicle.colors.silver"), value: "silver" },
+        { label: t("vehicle.colors.other"), value: "other" }
+    ];
+
+return (
+    <ScrollView>
         <View>
-            <Text>Vehicle Screen</Text>
+            <Text style={styles.label}>{t("vehicle.category")}</Text>
+
+            <Pressable
+                style={styles.dropdown}
+                onPress={() => {
+                    setOpenDropdown(
+                        openDropdown === "category" ? null : "category"
+                    );
+
+                    setTouched(previous => ({
+                        ...previous,
+                        vehicleCategory: true
+                    }));
+                }}
+            >
+                <Text style={styles.dropdownText}>
+                    {
+                        categoryOptions.find(
+                            option => option.value === formData.vehicleCategory
+                        )?.label || t("vehicle.categoryPlaceholder")
+                    }
+                </Text>
+
+                <Text style={styles.arrow}>
+                    {openDropdown === "category" ? "⌃" : "⌄"}
+                </Text>
+            </Pressable>
+
+            {openDropdown === "category" && (
+                <View style={styles.dropdownList}>
+                    {categoryOptions.map(option => (
+                        <Pressable
+                            key={option.value}
+                            style={[
+                                styles.dropdownOption,
+                                formData.vehicleCategory === option.value &&
+                                    styles.selectedOption
+                            ]}
+                            onPress={() => {
+                                updateFormData("vehicleCategory", option.value);
+                                setOpenDropdown(null);
+                            }}
+                        >
+                            <Text style={styles.dropdownText}>
+                                {option.label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
+            )}
+
+            {(showErrors || touched.vehicleCategory) &&
+                !validation.vehicleCategory && (
+                    <Text style={styles.error}>
+                        {t("vehicle.errors.category")}
+                    </Text>
+                )
+            }
+
+            <Text style={styles.label}>{t("vehicle.color")}</Text>
+            <Pressable
+            style={styles.dropdown}
+            onPress={() => {
+                setOpenDropdown(openDropdown === "color" ? null : "color");
+
+                setTouched(previous => ({
+                ...previous,
+                vehicleColor: true
+                }));
+            }}
+            >
+            <Text style={styles.dropdownText}>
+                {colorOptions.find(
+                option => option.value === formData.vehicleColor
+                )?.label || t("vehicle.colorPlaceholder")}
+            </Text>
+
+            <Text style={styles.arrow}>
+                {openDropdown === "color" ? "⌃" : "⌄"}
+            </Text>
+            </Pressable>
+
+            {openDropdown === "color" && (
+            <View style={styles.dropdownList}>
+                {colorOptions.map(option => (
+                <Pressable
+                    key={option.value}
+                    style={[
+                    styles.dropdownOption,
+                    formData.vehicleColor === option.value &&
+                        styles.selectedOption
+                    ]}
+                    onPress={() => {
+                    updateFormData("vehicleColor", option.value);
+                    setOpenDropdown(null);
+                    }}
+                >
+                    <Text style={styles.dropdownText}>
+                    {option.label}
+                    </Text>
+                </Pressable>
+                ))}
+            </View>
+            )}
+
+            {(showErrors || touched.vehicleColor) &&
+            !validation.vehicleColor && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.color")}
+                </Text>
+            )}
+
+
         </View>
-    );
+    </ScrollView>
+);
 }
+
+const styles = StyleSheet.create({
+    label: {
+        fontSize: 15,
+        fontWeight: "600",
+        marginBottom: 8,
+        color: "#222"
+    },
+
+    dropdown: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#CCCCCC",
+        borderRadius: 8,
+        padding: 14,
+        backgroundColor: "#FFFFFF"
+    },
+
+    dropdownText: {
+        fontSize: 15,
+        color: "#222222"
+    },
+
+    arrow: {
+        fontSize: 20,
+        color: "#666666"
+    },
+
+    dropdownList: {
+        borderWidth: 1,
+        borderColor: "#CCCCCC",
+        borderRadius: 8,
+        marginTop: 4,
+        backgroundColor: "#FFFFFF",
+        overflow: "hidden"
+    },
+
+    dropdownOption: {
+        padding: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: "#EEEEEE"
+    },
+
+    selectedOption: {
+        backgroundColor: "#EEEEEE"
+    },
+
+    error: {
+        color: "red",
+        fontSize: 12,
+        marginTop: 5
+    }
+});

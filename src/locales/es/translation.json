@@ -52,5 +52,30 @@
     "pending": {
         "title": "Registro en revisión",
         "description": "Estamos verificando tus documentos."
+    },
+    "vehicle": {
+        "title": "Información del vehículo",
+        "category": "Categoría",
+        "categoryPlaceholder": "Selecciona una categoría",
+        "categories": {
+            "economy": "Económico",
+            "xl": "XL",
+            "premium": "Premium"
+        },
+        "color": "Color del vehículo",
+        "colorPlaceholder": "Selecciona un color",
+        "colors": {
+            "white": "Blanco",
+            "black": "Negro",
+            "gray": "Gris",
+            "red": "Rojo",
+            "blue": "Azul",
+            "silver": "Plateado",
+            "other": "Otro"
+        },
+        "errors": {
+            "category": "Selecciona una categoría válida.",
+            "color": "Selecciona un color."
+        }
     }
 }
