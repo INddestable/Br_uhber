@@ -5,9 +5,10 @@ import {
     TextInput,
     ScrollView,
     Button,
-    Pressable
+    Pressable,
+    Image
 } from "react-native";
-
+import * as ImagePicker from "expo-image-picker";
 import { useRegistration } from "../../context/RegistrationContext";
 import { useTranslation } from "react-i18next";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -32,6 +33,8 @@ function formatBirthDate(dateString, language) {
     );
 }
 
+
+
 export default function PersonalDataScreen() {
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
@@ -42,6 +45,16 @@ export default function PersonalDataScreen() {
         { label: "personalData.gender.other", value: "other" },
         { label: "personalData.gender.preferNotToSay", value: "preferNotToSay" }
     ];
+
+    const languageOptions = [
+        { label: "personalData.language.spanish", value: "es" },
+        { label: "personalData.language.english", value: "en" }
+    ];
+
+    const changeLanguage = (language) => {
+        updateFormData("language", language);
+        i18n.changeLanguage(language);
+    };
 
     const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -57,9 +70,54 @@ export default function PersonalDataScreen() {
         ? formatBirthDate(formData.birthDate, i18n.language)
         : t("personalData.birthDatePlaceholder");
 
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8
+        });
+
+        if (!result.canceled) {
+            updateFormData("profilePhoto", result.assets[0].uri);
+        }
+    };
+
     return (
         <ScrollView>
             <View>
+
+                <Text>{t("personalData.profilePhoto")}</Text>
+                <Pressable onPress={pickImage}>
+                    {formData.profilePhoto ? (
+                        <Image
+                            source={{ uri: formData.profilePhoto }}
+                            style={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: 60
+                            }}
+                        />
+                    ) : (
+                        <View
+                            style={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: 60,
+                                backgroundColor: "#DDDDDD",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            <Text>+</Text>
+                        </View>
+                    )}
+                </Pressable>
+
+                <Button
+                    title={t("personalData.changePhoto")}
+                    onPress={pickImage}
+                />
 
                 <Text>{t("personalData.fullName")}</Text>
                 <TextInput
@@ -190,6 +248,52 @@ export default function PersonalDataScreen() {
                         <Text>{t(option.label)}</Text>
                     </Pressable>
                 ))}
+
+                <Text>{t("personalData.language.title")}</Text>
+
+                {languageOptions.map((option) => {
+                    const isSelected =
+                        formData.language === option.value ||
+                        (!formData.language && i18n.language === option.value);
+
+                    return (
+                        <Pressable
+                            key={option.value}
+                            onPress={() => changeLanguage(option.value)}
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginVertical: 8,
+                                gap: 10
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: 22,
+                                    height: 22,
+                                    borderRadius: 11,
+                                    borderWidth: 2,
+                                    borderColor: isSelected ? "#2685D8" : "#888",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}
+                            >
+                                {isSelected && (
+                                    <View
+                                        style={{
+                                            width: 10,
+                                            height: 10,
+                                            borderRadius: 5,
+                                            backgroundColor: "#2685D8"
+                                        }}
+                                    />
+                                )}
+                            </View>
+
+                            <Text>{t(option.label)}</Text>
+                        </Pressable>
+                    );
+                })}
 
             </View>
         </ScrollView>

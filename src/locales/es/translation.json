@@ -30,6 +30,13 @@
             "female": "Femenino",
             "other": "Otro",
             "preferNotToSay": "Prefiero no decirlo"
+        },
+        "profilePhoto": "Foto de perfil",
+        "changePhoto": "Seleccionar o cambiar fotografía",
+        "language": {
+            "title": "Idioma",
+            "spanish": "Español",
+            "english": "Inglés"
         }
     },
     "pending": {
