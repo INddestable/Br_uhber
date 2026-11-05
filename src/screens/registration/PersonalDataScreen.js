@@ -4,7 +4,8 @@ import {
     Text,
     TextInput,
     ScrollView,
-    Button
+    Button,
+    Pressable
 } from "react-native";
 
 import { useRegistration } from "../../context/RegistrationContext";
@@ -34,6 +35,13 @@ function formatBirthDate(dateString, language) {
 export default function PersonalDataScreen() {
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
+
+    const genderOptions = [
+        { label: "personalData.gender.male", value: "male" },
+        { label: "personalData.gender.female", value: "female" },
+        { label: "personalData.gender.other", value: "other" },
+        { label: "personalData.gender.preferNotToSay", value: "preferNotToSay" }
+    ];
 
     const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -137,6 +145,51 @@ export default function PersonalDataScreen() {
                         }}
                     />
                 )}
+
+                <Text>{t("personalData.gender.title")}</Text>
+                {genderOptions.map((option) => (
+                    <Pressable
+                        key={option.value}
+                        onPress={() => {
+                            updateFormData("gender", option.value);
+                        }}
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginVertical: 8,
+                            gap: 10
+                        }}
+                    >
+                        {/* Circulo exterior */}
+                        <View
+                            style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 11,
+                                borderWidth: 2,
+                                borderColor: formData.gender === option.value
+                                    ? "#2685D8"
+                                    : "#888",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            {/* Circulo interior */}
+                            {formData.gender === option.value && (
+                                <View
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 5,
+                                        backgroundColor: "#2685D8"
+                                    }}
+                                />
+                            )}
+                        </View>
+
+                        <Text>{t(option.label)}</Text>
+                    </Pressable>
+                ))}
 
             </View>
         </ScrollView>

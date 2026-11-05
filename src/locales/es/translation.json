@@ -23,7 +23,14 @@
         "email": "Correo electrónico",
         "emailPlaceholder": "ejemplo@correo.com",
         "birthDate": "Fecha de nacimiento",
-        "birthDatePlaceholder": "Seleccionar fecha"
+        "birthDatePlaceholder": "Seleccionar fecha",
+        "gender": {
+            "title": "Género",
+            "male": "Masculino",
+            "female": "Femenino",
+            "other": "Otro",
+            "preferNotToSay": "Prefiero no decirlo"
+        }
     },
     "pending": {
         "title": "Registro en revisión",

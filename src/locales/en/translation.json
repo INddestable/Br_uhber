@@ -23,7 +23,14 @@
         "email": "Email address",
         "emailPlaceholder": "example@email.com",
         "birthDate": "Date of birth",
-        "birthDatePlaceholder": "Select date"
+        "birthDatePlaceholder": "Select date",
+        "gender": {
+            "title": "Gender",
+            "male": "Male",
+            "female": "Female",
+            "other": "Other",
+            "preferNotToSay": "Prefer not to say"
+        }
     },
     "pending": {
         "title": "Registration under review",
