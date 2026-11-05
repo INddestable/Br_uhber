@@ -114,6 +114,8 @@ export default function PersonalDataScreen({ navigation }) {
     const validation = validatePersonalData(formData);
     const isFormValid = Object.values(validation).every(Boolean);
 
+    const [touched, setTouched] = useState({});
+
     const handleContinue = () => {
         setShowErrors(true);
 
@@ -174,7 +176,14 @@ export default function PersonalDataScreen({ navigation }) {
             <View>
 
                 <Text>{t("personalData.profilePhoto")}</Text>
-                <Pressable onPress={pickImage}>
+                <Pressable onPress={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            profilePhoto: true
+                        }));
+
+                        pickImage();
+                    }}>
                     {formData.profilePhoto ? (
                         <Image
                             source={{ uri: formData.profilePhoto }}
@@ -202,9 +211,16 @@ export default function PersonalDataScreen({ navigation }) {
 
                 <Button
                     title={t("personalData.changePhoto")}
-                    onPress={pickImage}
+                    onPress={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            profilePhoto: true
+                        }));
+
+                        pickImage();
+                    }}
                 />
-                {showErrors && !validation.profilePhoto && (
+                {(showErrors || touched.profilePhoto ) && !validation.profilePhoto && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.profilePhoto")}
                     </Text>
@@ -218,8 +234,14 @@ export default function PersonalDataScreen({ navigation }) {
                     onChangeText={(text) => {
                         updateFormData("fullName", text);
                     }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            fullName: true
+                        }));
+                    }}
                 />
-                {showErrors && !validation.fullName && (
+                {(showErrors || touched.fullName) && !validation.fullName && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.fullName")}
                     </Text>
@@ -237,8 +259,14 @@ export default function PersonalDataScreen({ navigation }) {
                             text.replace(/[^0-9]/g, "")
                         );
                     }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            documentNumber: true
+                        }));
+                    }}
                 />
-                {showErrors && !validation.documentNumber && (
+                {(showErrors || touched.documentNumber) && !validation.documentNumber && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.documentNumber")}
                     </Text>
@@ -256,8 +284,14 @@ export default function PersonalDataScreen({ navigation }) {
                             text.replace(/[^0-9]/g, "")
                         );
                     }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            phone: true
+                        }));
+                    }}
                 />
-                {showErrors && !validation.phone && (
+                {(showErrors || touched.phone ) && !validation.phone && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.phone")}
                     </Text>
@@ -272,8 +306,14 @@ export default function PersonalDataScreen({ navigation }) {
                     onChangeText={(text) => {
                         updateFormData("email", text);
                     }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            email: true
+                        }));
+                    }}
                 />
-                {showErrors && !validation.email && (
+                {(showErrors || touched.email ) && !validation.email && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.email")}
                     </Text>
@@ -282,7 +322,14 @@ export default function PersonalDataScreen({ navigation }) {
                 <Text>{t("personalData.birthDate")}</Text>
                 <Button
                     title={birthDateDisplay}
-                    onPress={() => setShowDatePicker(true)}
+                    onPress={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            birthDate: true
+                        }));
+
+                        setShowDatePicker(true);
+                    }}
                 />
                 {showDatePicker && (
                     <DateTimePicker
@@ -315,7 +362,7 @@ export default function PersonalDataScreen({ navigation }) {
                         }}
                     />
                 )}
-                {showErrors && !validation.birthDate && (
+                {(showErrors || touched.birthDate ) && !validation.birthDate && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.birthDate")}
                     </Text>
@@ -327,6 +374,11 @@ export default function PersonalDataScreen({ navigation }) {
                         key={option.value}
                         onPress={() => {
                             updateFormData("gender", option.value);
+
+                            setTouched(previous => ({
+                                ...previous,
+                                gender: true
+                            }));
                         }}
                         style={{
                             flexDirection: "row",
@@ -365,7 +417,7 @@ export default function PersonalDataScreen({ navigation }) {
                         <Text>{t(option.label)}</Text>
                     </Pressable>
                 ))}
-                {showErrors && !validation.gender && (
+                {(showErrors || touched.gender ) && !validation.gender && (
                     <Text style={{ color: "red" }}>
                         {t("personalData.errors.gender")}
                     </Text>
