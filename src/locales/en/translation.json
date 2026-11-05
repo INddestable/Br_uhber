@@ -10,7 +10,8 @@
         "personal": "Personal information",
         "vehicle": "Vehicle",
         "documents": "Documents",
-        "submit": "Submit registration"
+        "submit": "Submit registration",
+        "continue": "Continue"
     },
     "personalData": {
         "title": "Personal information",
@@ -37,6 +38,15 @@
             "title": "Language",
             "spanish": "Spanish",
             "english": "English"
+        },
+        "errors": {
+            "fullName": "Enter a valid name (maximum 50 characters).",
+            "documentNumber": "The document must contain between 6 and 10 digits.",
+            "phone": "The phone number must contain exactly 10 digits.",
+            "email": "Enter a valid email address.",
+            "birthDate": "You must be at least 18 years old.",
+            "profilePhoto": "A profile photo is required.",
+            "gender": "Select a gender option."
         }
     },
     "pending": {

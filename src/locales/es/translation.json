@@ -10,7 +10,8 @@
         "personal": "Datos personales",
         "vehicle": "Vehículo",
         "documents": "Documentos",
-        "submit": "Enviar registro"
+        "submit": "Enviar registro",
+        "continue": "Continuar"
     },
     "personalData": {
         "title": "Datos personales",
@@ -37,6 +38,15 @@
             "title": "Idioma",
             "spanish": "Español",
             "english": "Inglés"
+        },
+        "errors": {
+            "fullName": "Ingresa un nombre válido (máximo 50 caracteres).",
+            "documentNumber": "El documento debe tener entre 6 y 10 dígitos.",
+            "phone": "El teléfono debe tener exactamente 10 dígitos.",
+            "email": "Ingresa un correo electrónico válido.",
+            "birthDate": "Debes tener al menos 18 años.",
+            "profilePhoto": "La fotografía de perfil es obligatoria.",
+            "gender": "Selecciona una opción de género."
         }
     },
     "pending": {

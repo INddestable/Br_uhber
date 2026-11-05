@@ -107,12 +107,22 @@ function validatePersonalData(data) {
     };
 }
 
-export default function PersonalDataScreen() {
+export default function PersonalDataScreen({ navigation }) {    
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
 
     const validation = validatePersonalData(formData);
     const isFormValid = Object.values(validation).every(Boolean);
+
+    const handleContinue = () => {
+        setShowErrors(true);
+
+        if (!isFormValid) {
+            return;
+        }
+
+        navigation.navigate("Vehicle");
+    };
 
     const genderOptions = [
         { label: "personalData.gender.male", value: "male" },
@@ -194,15 +204,26 @@ export default function PersonalDataScreen() {
                     title={t("personalData.changePhoto")}
                     onPress={pickImage}
                 />
+                {showErrors && !validation.profilePhoto && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.profilePhoto")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.fullName")}</Text>
                 <TextInput
                     placeholder={t("personalData.fullNamePlaceholder")}
                     value={formData.fullName || ""}
+                    maxLength={50}
                     onChangeText={(text) => {
                         updateFormData("fullName", text);
                     }}
                 />
+                {showErrors && !validation.fullName && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.fullName")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.documentNumber")}</Text>
                 <TextInput
@@ -217,6 +238,11 @@ export default function PersonalDataScreen() {
                         );
                     }}
                 />
+                {showErrors && !validation.documentNumber && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.documentNumber")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.phone")}</Text>
                 <TextInput
@@ -231,6 +257,11 @@ export default function PersonalDataScreen() {
                         );
                     }}
                 />
+                {showErrors && !validation.phone && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.phone")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.email")}</Text>
                 <TextInput
@@ -242,6 +273,11 @@ export default function PersonalDataScreen() {
                         updateFormData("email", text);
                     }}
                 />
+                {showErrors && !validation.email && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.email")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.birthDate")}</Text>
                 <Button
@@ -278,6 +314,11 @@ export default function PersonalDataScreen() {
                             }
                         }}
                     />
+                )}
+                {showErrors && !validation.birthDate && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.birthDate")}
+                    </Text>
                 )}
 
                 <Text>{t("personalData.gender.title")}</Text>
@@ -324,6 +365,11 @@ export default function PersonalDataScreen() {
                         <Text>{t(option.label)}</Text>
                     </Pressable>
                 ))}
+                {showErrors && !validation.gender && (
+                    <Text style={{ color: "red" }}>
+                        {t("personalData.errors.gender")}
+                    </Text>
+                )}
 
                 <Text>{t("personalData.language.title")}</Text>
 
@@ -372,6 +418,13 @@ export default function PersonalDataScreen() {
                 })}
 
             </View>
+
+            <Button
+                title={t("register.continue")}
+                onPress={handleContinue}
+                disabled={!isFormValid}
+            />
+
         </ScrollView>
     );
 }
