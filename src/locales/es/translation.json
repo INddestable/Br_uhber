@@ -75,7 +75,10 @@
         },
         "errors": {
             "category": "Selecciona una categoría válida.",
-            "color": "Selecciona un color."
-        }
+            "color": "Selecciona un color.",
+            "plate": "Ingresa una placa válida (3 letras y 3 números)."
+        },
+        "plate": "Placa del vehículo",
+        "platePlaceholder": "Ej. ABC123"
     }
 }

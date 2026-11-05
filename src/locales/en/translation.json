@@ -75,7 +75,10 @@
         },
         "errors": {
             "category": "Select a valid category.",
-            "color": "Select a color."
-        }
+            "color": "Select a color.",
+            "plate": "Enter a valid plate (3 letters and 3 numbers)."
+        },
+        "plate": "Vehicle license plate",
+        "platePlaceholder": "E.g. ABC123"
     }
 }

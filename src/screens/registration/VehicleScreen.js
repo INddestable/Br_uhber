@@ -222,6 +222,30 @@ return (
                 </Text>
             )}
 
+            <Text style={styles.label}>{t("vehicle.plate")}</Text>
+            <TextInput
+                style={styles.input}
+                value={formData.vehiclePlate || ""}
+                onChangeText={text =>
+                    updateFormData("vehiclePlate", text.toUpperCase())
+                }
+                onBlur={() =>
+                    setTouched(previous => ({
+                    ...previous,
+                    vehiclePlate: true
+                    }))
+                }
+                placeholder={t("vehicle.platePlaceholder")}
+                maxLength={6}
+                autoCapitalize="characters"
+            />
+
+                {(showErrors || touched.vehiclePlate) &&
+                !validation.vehiclePlate && (
+                    <Text style={styles.error}>
+                    {t("vehicle.errors.plate")}
+                    </Text>
+                )}
 
         </View>
     </ScrollView>
@@ -280,5 +304,15 @@ const styles = StyleSheet.create({
         color: "red",
         fontSize: 12,
         marginTop: 5
-    }
+    },
+
+    input: {
+        borderWidth: 1,
+        borderColor: "#CCCCCC",
+        borderRadius: 8,
+        padding: 14,
+        fontSize: 15,
+        backgroundColor: "#FFFFFF",
+        color: "#222222"
+    },
 });
