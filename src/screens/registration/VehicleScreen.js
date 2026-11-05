@@ -36,15 +36,6 @@ function validateVehicleModel(model) {
     return model.trim().length > 0 && model.length <= 30;
 }
 
-function validateVehicleYear(year) {
-    const yearRegex = /^\d{4}$/;
-
-    return (
-        yearRegex.test(String(year)) &&
-        Number(year) <= new Date().getFullYear()
-    );
-}
-
 function validateVehicleColor(color) {
     return Boolean(color);
 }
@@ -56,6 +47,15 @@ function validateVehicleCapacity(capacity, category) {
         capacityRegex.test(String(capacity)) &&
         Number(capacity) >= (category === "xl" ? 6 : 1)
     );
+}
+
+function validateVehicleYear(year) {
+  const yearRegex = /^\d{4}$/;
+
+  return (
+    yearRegex.test(String(year)) &&
+    Number(year) <= new Date().getFullYear()+1
+  );
 }
 
 function validateVehiclePhoto(photo) {
@@ -246,6 +246,107 @@ return (
                     {t("vehicle.errors.plate")}
                     </Text>
                 )}
+
+            <Text style={styles.label}>{t("vehicle.brand")}</Text>
+            <TextInput
+                style={styles.input}
+                value={formData.vehicleBrand || ""}
+                onChangeText={text =>
+                    updateFormData("vehicleBrand", text)
+                }
+                onBlur={() =>
+                    setTouched(previous => ({
+                    ...previous,
+                    vehicleBrand: true
+                    }))
+                }
+                placeholder={t("vehicle.brandPlaceholder")}
+                maxLength={30}
+            />
+
+            {(showErrors || touched.vehicleBrand) && !validation.vehicleBrand && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.brand")}
+                </Text>
+            )}
+
+            <Text style={styles.label}>{t("vehicle.model")}</Text>
+            <TextInput
+                style={styles.input}
+                value={formData.vehicleModel || ""}
+                onChangeText={text =>
+                    updateFormData("vehicleModel", text)
+                }
+                onBlur={() =>
+                    setTouched(previous => ({
+                    ...previous,
+                    vehicleModel: true
+                    }))
+                }
+                placeholder={t("vehicle.modelPlaceholder")}
+                maxLength={30}
+            />
+
+            {(showErrors || touched.vehicleModel) &&
+            !validation.vehicleModel && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.model")}
+                </Text>
+            )}
+
+            <Text style={styles.label}>{t("vehicle.year")}</Text>
+            <TextInput
+                style={styles.input}
+                value={formData.vehicleYear || ""}
+                onChangeText={text =>
+                    updateFormData(
+                    "vehicleYear",
+                    text.replace(/\D/g, "")
+                    )
+                }
+                onBlur={() =>
+                    setTouched(previous => ({
+                    ...previous,
+                    vehicleYear: true
+                    }))
+                }
+                placeholder={t("vehicle.yearPlaceholder")}
+                keyboardType="numeric"
+                maxLength={4}
+            />
+
+            {(showErrors || touched.vehicleYear) && !validation.vehicleYear && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.year")}
+                </Text>
+            )}
+
+            <Text style={styles.label}>{t("vehicle.capacity")}</Text>
+            <TextInput
+                style={styles.input}
+                value={formData.vehicleCapacity || ""}
+                onChangeText={text =>
+                    updateFormData(
+                        "vehicleCapacity",
+                        text.replace(/\D/g, "")
+                    )
+                }
+                onBlur={() =>
+                    setTouched(previous => ({
+                    ...previous,
+                    vehicleCapacity: true
+                    }))
+                }
+                placeholder={t("vehicle.capacityPlaceholder")}
+                keyboardType="numeric"
+            />
+
+            {(showErrors || touched.vehicleCapacity) &&
+            !validation.vehicleCapacity && (
+                <Text style={styles.error}>
+                {t("vehicle.errors.capacity")}
+                </Text>
+            )}
 
         </View>
     </ScrollView>

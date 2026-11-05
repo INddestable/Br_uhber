@@ -76,9 +76,21 @@
         "errors": {
             "category": "Selecciona una categoría válida.",
             "color": "Selecciona un color.",
-            "plate": "Ingresa una placa válida (3 letras y 3 números)."
+            "plate": "Ingresa una placa válida (3 letras y 3 números).",
+            "brand": "Ingresa la marca del vehículo.",
+            "model": "Ingresa el modelo del vehículo.",
+            "year": "Ingresa un año válido de cuatro dígitos.",
+            "capacity": "La capacidad debe ser de al menos 6 pasajeros para XL y 1 para las demás categorías."
         },
         "plate": "Placa del vehículo",
-        "platePlaceholder": "Ej. ABC123"
+        "platePlaceholder": "Ej. ABC123",
+        "brand": "Marca",
+        "brandPlaceholder": "Ej. Toyota",
+        "model": "Modelo",
+        "modelPlaceholder": "Ej. Corolla",
+        "year": "Año del vehículo",
+        "yearPlaceholder": "Ej. 2022",
+        "capacity": "Capacidad de pasajeros",
+        "capacityPlaceholder": "Ej. 4"
     }
 }

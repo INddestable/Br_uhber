@@ -76,9 +76,21 @@
         "errors": {
             "category": "Select a valid category.",
             "color": "Select a color.",
-            "plate": "Enter a valid plate (3 letters and 3 numbers)."
+            "plate": "Enter a valid plate (3 letters and 3 numbers).",
+            "brand": "Enter the vehicle brand.",
+            "model": "Enter the vehicle model.",
+            "year": "Enter a valid four-digit year.",
+            "capacity": "Capacity must be at least 6 passengers for XL and 1 for other categories."
         },
         "plate": "Vehicle license plate",
-        "platePlaceholder": "E.g. ABC123"
+        "platePlaceholder": "E.g. ABC123",
+        "brand": "Brand",
+        "brandPlaceholder": "E.g. Toyota",
+        "model": "Model",
+        "modelPlaceholder": "E.g. Corolla",
+        "year": "Vehicle year",
+        "yearPlaceholder": "E.g. 2022",
+        "capacity": "Passenger capacity",
+        "capacityPlaceholder": "E.g. 4"
     }
 }
