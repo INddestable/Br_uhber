@@ -165,9 +165,9 @@
         "registrationErrorMessage": "Registration could not be completed. Check your connection and try again."
     },
     "navigation": {
-        "work": "Trabajo",
-        "earnings": "Ganancias",
-        "profile": "Perfil",
-        "settings": "Ajustes"
+        "work": "Work",
+        "earnings": "Earnings",
+        "profile": "Profile",
+        "settings": "Settings"
     }
 }

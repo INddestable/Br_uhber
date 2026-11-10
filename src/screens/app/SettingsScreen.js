@@ -4,7 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function SettingsScreen() {
     const { language, changeLanguage } = useLanguage();
-    const { theme, changeTheme, colors } = useTheme();
+    const { theme, changeTheme, colors, typography } = useTheme();
 
     const translations = {
         es: {
@@ -28,6 +28,39 @@ export default function SettingsScreen() {
     };
 
     const t = translations[language] || translations.es;
+
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: 24,
+        },
+        title: {
+            fontSize: 32,
+            marginTop: 40,
+            marginBottom: 35,
+            fontFamily: typography.bold
+        },
+        sectionTitle: {
+            fontSize: 20,
+            marginBottom: 12,
+            fontFamily: typography.regular
+        },
+        options: {
+            flexDirection: "row",
+            padding: 5,
+            borderRadius: 12,
+            marginBottom: 30,
+        },
+        option: {
+            flex: 1,
+            padding: 14,
+            alignItems: "center",
+            borderRadius: 9,
+        },
+        optionText: {
+            fontFamily: typography.bold
+        },
+    });
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -111,35 +144,3 @@ export default function SettingsScreen() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 24,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        marginBottom: 35,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 12,
-    },
-    options: {
-        flexDirection: "row",
-        padding: 5,
-        borderRadius: 12,
-        marginBottom: 30,
-    },
-    option: {
-        flex: 1,
-        padding: 14,
-        alignItems: "center",
-        borderRadius: 9,
-    },
-    optionText: {
-        fontWeight: "600",
-    },
-});
