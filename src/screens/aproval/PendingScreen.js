@@ -3,8 +3,44 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function PendingScreen({ navigation }) {
-    const { colors } = useTheme();
+    const { colors, typography } = useTheme();
     const { language } = useLanguage();
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 25
+        },
+        title: {
+            fontSize: 30,
+            marginBottom: 15,
+            fontFamily: typography.bold
+        },
+        description: {
+            fontSize: 16,
+            textAlign: "center",
+            marginBottom: 20,
+            fontFamily: typography.regular
+        },
+        status: {
+            fontSize: 20,
+            color: "#D99500",
+            textAlign: "center",
+            marginBottom: 30,
+            fontFamily: typography.bold
+        },
+        button: {
+            paddingVertical: 13,
+            paddingHorizontal: 35,
+            borderRadius: 10
+        },
+        buttonText: {
+            color: "#FFFFFF",
+            fontSize: 19,
+            fontFamily: typography.bold
+        }
+    });
 
     const t = {
         es: {
@@ -45,38 +81,3 @@ export default function PendingScreen({ navigation }) {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 25
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: "bold",
-        marginBottom: 15
-    },
-    description: {
-        fontSize: 16,
-        textAlign: "center",
-        marginBottom: 20
-    },
-    status: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "#D99500",
-        textAlign: "center",
-        marginBottom: 30
-    },
-    button: {
-        paddingVertical: 13,
-        paddingHorizontal: 35,
-        borderRadius: 10
-    },
-    buttonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        fontSize: 16
-    }
-});

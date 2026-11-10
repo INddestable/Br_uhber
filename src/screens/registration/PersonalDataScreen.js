@@ -69,6 +69,17 @@ function validateEmail(email) {
     return emailRegex.test(email);
 }
 
+function validatePassword(password) {
+    return password.length >= 6;
+}
+
+function validateConfirmPassword(password, confirmPassword) {
+    return (
+        confirmPassword.length > 0 &&
+        password === confirmPassword
+    );
+}
+
 function validateBirthDate(birthDate) {
     if (!birthDate) return false;
 
@@ -104,6 +115,11 @@ function validatePersonalData(data) {
         documentNumber: validateDocumentNumber(data.documentNumber || ""),
         phone: validatePhone(data.phone || ""),
         email: validateEmail(data.email || ""),
+        password: validatePassword(data.password || ""),        
+        confirmPassword: validateConfirmPassword(
+            data.password || "",
+            data.confirmPassword || ""
+        ),
         birthDate: validateBirthDate(data.birthDate),
         profilePhoto: validateProfilePhoto(data.profilePhoto),
         gender: validateGender(data.gender),
@@ -116,7 +132,7 @@ export default function PersonalDataScreen({ navigation }) {
     const { t, i18n } = useTranslation();
     const { formData, updateFormData } = useRegistration();
 
-    const { colors } = useTheme();
+    const { colors, typography } = useTheme();
     const { language: appLanguage, changeLanguage: changeAppLanguage } = useLanguage();
 
     const validation = validatePersonalData(formData);
@@ -140,7 +156,7 @@ export default function PersonalDataScreen({ navigation }) {
         label: {
             color: colors.text,
             fontSize: 16,
-            fontWeight: "600",
+            fontFamily: typography.medium,
             marginTop: 12
         },
         input: {
@@ -150,14 +166,16 @@ export default function PersonalDataScreen({ navigation }) {
             borderColor: colors.border,
             borderRadius: 10,
             padding: 12,
-            fontSize: 16
+            fontSize: 16,
+            fontFamily: typography.regular
         },
         placeholder: {
             color: colors.secondaryText
         },
         error: {
             color: "#EF4444",
-            fontSize: 13
+            fontSize: 13,
+            fontFamily: typography.regular
         },
         button: {
             backgroundColor: colors.primary,
@@ -169,8 +187,8 @@ export default function PersonalDataScreen({ navigation }) {
         },
         buttonText: {
             color: "#FFFFFF",
-            fontSize: 16,
-            fontWeight: "bold"
+            fontSize: 17,
+            fontFamily: typography.bold
         },
         photoPlaceholder: {
             width: 120,
@@ -208,7 +226,8 @@ export default function PersonalDataScreen({ navigation }) {
         },
         optionText: {
             color: colors.text,
-            fontSize: 15
+            fontSize: 15,
+            fontFamily: typography.regular
         }
     });
 
@@ -456,6 +475,68 @@ export default function PersonalDataScreen({ navigation }) {
                     </Text>
                 )}
 
+
+                {/* Contraseña */}
+                <Text style={styles.label}>
+                    {t("auth.register.password")}
+                </Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder={t("auth.register.passwordPlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
+                    value={formData.password || ""}
+                    onChangeText={(text) => {
+                        updateFormData("password", text);
+                    }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            password: true
+                        }));
+                    }}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+
+                {(showErrors || touched.password) && !validation.password && (
+                    <Text style={styles.error}>
+                        {t("auth.register.passwordError")}
+                    </Text>
+                )}
+
+                {/* Confirmar contraseña */}
+                <Text style={styles.label}>
+                    {t("auth.register.confirmPassword")}
+                </Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder={t("auth.register.confirmPasswordPlaceholder")}
+                    placeholderTextColor={colors.secondaryText}
+                    value={formData.confirmPassword || ""}
+                    onChangeText={(text) => {
+                        updateFormData("confirmPassword", text);
+                    }}
+                    onBlur={() => {
+                        setTouched(previous => ({
+                            ...previous,
+                            confirmPassword: true
+                        }));
+                    }}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+
+                {(showErrors || touched.confirmPassword) && !validation.confirmPassword && (
+                    <Text style={styles.error}>
+                        {t("auth.register.passwordMismatch")}
+                    </Text>
+                )}
+
+
                 {/* Fecha de nacimiento */}
                 <Text style={styles.label}>
                     {t("personalData.birthDate")}
@@ -621,7 +702,7 @@ export default function PersonalDataScreen({ navigation }) {
                 ]}
                 onPress={() => navigation.getParent()?.navigate("Settings")}
             >
-                <Text style={[styles.optionText, { fontWeight: "bold" }]}>
+                <Text style={[styles.optionText, { fontFamily: typography.bold }]}>
                     {t("settings.title", "Ajustes")} ⚙
                 </Text>
             </Pressable>

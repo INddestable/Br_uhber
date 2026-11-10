@@ -1,7 +1,7 @@
 {
     "auth": {
         "register": {
-            "title": "Crear cuenta",
+            "title": "Crear una contraseña para tu cuenta",
             "password": "Contraseña",
             "passwordPlaceholder": "Crea tu contraseña",
             "passwordError": "La contraseña debe tener al menos 6 caracteres.",

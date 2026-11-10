@@ -82,7 +82,7 @@ function validateVehicleData(data) {
 export default function VehicleScreen({ navigation }) {
     const { t } = useTranslation();
     const { formData, updateFormData } = useRegistration();
-    const { colors } = useTheme();
+    const { colors, typography } = useTheme();
 
     const validation = validateVehicleData(formData);
     const isFormValid = Object.values(validation).every(Boolean);
@@ -106,7 +106,8 @@ export default function VehicleScreen({ navigation }) {
             fontWeight: "600",
             marginBottom: 8,
             marginTop: 15,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.regular
         },
         dropdown: {
             flexDirection: "row",
@@ -120,7 +121,8 @@ export default function VehicleScreen({ navigation }) {
         },
         dropdownText: {
             fontSize: 15,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.regular
         },
         arrow: {
             fontSize: 20,
@@ -154,7 +156,8 @@ export default function VehicleScreen({ navigation }) {
             padding: 14,
             fontSize: 15,
             backgroundColor: colors.card,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.regular
         },
         vehiclePhoto: {
             width: "100%",
@@ -167,7 +170,8 @@ export default function VehicleScreen({ navigation }) {
         description: {
             color: colors.secondaryText,
             fontSize: 14,
-            marginBottom: 8
+            marginBottom: 8,
+            fontFamily: typography.regular
         },
         continueButton: {
             backgroundColor: colors.primary,
@@ -178,8 +182,8 @@ export default function VehicleScreen({ navigation }) {
         },
         continueButtonText: {
             color: "#FFFFFF",
-            fontSize: 16,
-            fontWeight: "bold"
+            fontSize: 20,
+            fontFamily: typography.bold
         },
         settingsButton: {
             alignSelf: "flex-end",
@@ -193,7 +197,8 @@ export default function VehicleScreen({ navigation }) {
         },
         settingsButtonText: {
             color: colors.text,
-            fontWeight: "600"
+            fontWeight: "600",
+            fontFamily: typography.regular
         }
     });
 

@@ -25,6 +25,12 @@ const themes = {
     },
 };
 
+const typography = {
+    regular: "Roboto",
+    medium: "RobotoMedium",
+    bold: "RobotoBold"
+};
+
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState("light");
 
@@ -52,6 +58,7 @@ export function ThemeProvider({ children }) {
             value={{
                 theme,
                 colors,
+                typography,
                 changeTheme,
                 isDark: theme === "dark",
             }}
