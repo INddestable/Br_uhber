@@ -47,15 +47,20 @@ export default function PendingScreen({ navigation }) {
             title: "Solicitud pendiente",
             description: "Hemos recibido tu solicitud para convertirte en conductor de Bruhber.",
             status: "Tu cuenta está pendiente de aprobación.",
-            settings: "Ajustes"
+            settings: "Ajustes",
+            returnToLogin: "Volver al inicio de sesión"
         },
         en: {
             title: "Application pending",
             description: "We have received your application to become a Bruhber driver.",
             status: "Your account is awaiting approval.",
-            settings: "Settings"
+            settings: "Settings",
+            returnToLogin: "Return to login"
         }
     }[language] || {};
+
+    console.log("Navegador actual:", navigation.getState());
+    console.log("Navegador padre:", navigation.getParent()?.getState());
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -71,8 +76,27 @@ export default function PendingScreen({ navigation }) {
                 {t.status}
             </Text>
 
+
+
             <Pressable
-                style={[styles.button, { backgroundColor: colors.primary }]}
+                style={[
+                    styles.button,
+                    { backgroundColor: colors.primary }
+                ]}
+                onPress={() => {
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: "Auth" }]
+                    });
+                }}
+            >
+                <Text style={styles.buttonText}>
+                    {t.returnToLogin}
+                </Text>
+            </Pressable>
+
+            <Pressable
+                style={[styles.button, { backgroundColor: colors.primary , marginTop: 10}]}
                 onPress={() => navigation.navigate("Settings")}
             >
                 <Text style={styles.buttonText}>{t.settings}</Text>
