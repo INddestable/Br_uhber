@@ -163,5 +163,11 @@
         },
         "registrationErrorTitle": "Error en el registro",
         "registrationErrorMessage": "No se pudo completar el registro. Comprueba tu conexión e inténtalo nuevamente."
+    },
+    "navigation": {
+        "work": "Trabajo",
+        "earnings": "Ganancias",
+        "profile": "Perfil",
+        "settings": "Ajustes"
     }
 }
