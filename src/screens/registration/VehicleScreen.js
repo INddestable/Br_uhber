@@ -81,7 +81,7 @@ function validateVehicleData(data) {
 
 export default function VehicleScreen({ navigation }) {
     const { t } = useTranslation();
-    const { formData, updateFormData } = useRegistration();
+    const { formData, updateFormData, clearFormData } = useRegistration();
     const { colors, typography } = useTheme();
 
     const validation = validateVehicleData(formData);

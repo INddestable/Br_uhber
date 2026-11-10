@@ -130,7 +130,7 @@ function validatePersonalData(data) {
 export default function PersonalDataScreen({ navigation }) {
 
     const { t, i18n } = useTranslation();
-    const { formData, updateFormData } = useRegistration();
+    const { formData, updateFormData, clearFormData } = useRegistration();
 
     const { colors, typography } = useTheme();
     const { language: appLanguage, changeLanguage: changeAppLanguage } = useLanguage();
@@ -699,7 +699,7 @@ export default function PersonalDataScreen({ navigation }) {
                         borderWidth: 1,
                         borderColor: colors.border
                     }
-                ]}
+                ]}  
                 onPress={() => navigation.getParent()?.navigate("Settings")}
             >
                 <Text style={[styles.optionText, { fontFamily: typography.bold }]}>

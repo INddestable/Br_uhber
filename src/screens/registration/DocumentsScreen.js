@@ -57,7 +57,7 @@ function isValidEmail(email) {
 
 export default function DocumentsScreen({ navigation }) {
     const { t } = useTranslation();
-    const { formData, updateFormData } = useRegistration();
+    const { formData, updateFormData, clearFormData } = useRegistration();
     const { colors, typography } = useTheme();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -372,7 +372,7 @@ export default function DocumentsScreen({ navigation }) {
             console.log("Registro completado:", result.uid);
 
             // Ya no necesitamos conservar la contraseña.
-            updateFormData("password", "");
+            clearFormData();
 
             // Ir a la pantalla de aprobación pendiente.
             navigation.replace("Pending");
