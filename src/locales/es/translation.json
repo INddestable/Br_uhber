@@ -193,6 +193,38 @@
                 "description": "Vincula tu cuenta para recibir las ganancias de tus viajes.",
                 "status": "Cuenta sin vincular"
             }
+        },
+        "edit": {
+            "edit": "Editar",
+            "save": "Guardar cambios",
+            "cancel": "Cancelar",
+            "successTitle": "Perfil actualizado",
+            "successMessage": "Tus cambios se guardaron correctamente.",
+            "changePhoto": "Cambiar fotografía",
+            "photoUploaded": "Fotografía cargada",
+            "noPhoto": "Sin fotografía"
+        },
+        "vehicle": {
+            "title": "Información del vehículo",
+            "brand": "Marca",
+            "model": "Modelo",
+            "year": "Año",
+            "plate": "Placa",
+            "color": "Color",
+            "capacity": "Capacidad",
+            "category": "Categoría",
+            "photo": "Fotografía del vehículo"
+        },
+        "documents": {
+            "title": "Documentación",
+            "licenseNumber": "Número de licencia",
+            "licenseExpiration": "Vencimiento de licencia",
+            "licensePhoto": "Fotografía de licencia",
+            "soatExpiration": "Vencimiento del SOAT",
+            "soatPhoto": "Fotografía del SOAT",
+            "paymentEmail": "Correo de pagos",
+            "acceptedTerms": "Términos aceptados",
+            "technicalReviewPhoto": "Fotografía de revisión técnico-mecánica"
         }
     }
 }

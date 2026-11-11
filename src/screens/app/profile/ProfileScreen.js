@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 
 import ProfileTabs from "../../../components/profile/ProfileTabs";
 import PersonalInfo from "../../../components/profile/PersonalInfo";
+import VehicleInfo from "../../../components/profile/VehicleInfo";
+import DocumentsInfo from "../../../components/profile/DocumentsInfo";
 
 export default function ProfileScreen() {
     const { colors } = useTheme();
@@ -93,6 +95,14 @@ export default function ProfileScreen() {
 
             {activeTab === "personal" && (
                 <PersonalInfo driver={driver} />
+            )}
+
+            {activeTab === "vehicle" && (
+                <VehicleInfo driver={driver} />
+            )}
+
+            {activeTab === "documents" && (
+                <DocumentsInfo driver={driver} />
             )}
 
         </View>

@@ -193,6 +193,38 @@
                 "description": "Link your account to receive your trip earnings.",
                 "status": "Account not linked"
             }
+        },
+        "edit": {
+            "edit": "Edit",
+            "save": "Save changes",
+            "cancel": "Cancel",
+            "successTitle": "Profile updated",
+            "successMessage": "Your changes were saved successfully.",
+            "changePhoto": "Change photo",
+            "photoUploaded": "Photo uploaded",
+            "noPhoto": "No photo"
+        },
+        "vehicle": {
+            "title": "Vehicle information",
+            "brand": "Brand",
+            "model": "Model",
+            "year": "Year",
+            "plate": "License plate",
+            "color": "Color",
+            "capacity": "Capacity",
+            "category": "Category",
+            "photo": "Vehicle photo"
+        },
+        "documents": {
+            "title": "Documents",
+            "licenseNumber": "License number",
+            "licenseExpiration": "License expiration",
+            "licensePhoto": "License photo",
+            "soatExpiration": "SOAT expiration",
+            "soatPhoto": "SOAT photo",
+            "paymentEmail": "Payment email",
+            "acceptedTerms": "Accepted terms",
+            "technicalReviewPhoto": "Vehicle inspection photo"
         }
     }
 }
