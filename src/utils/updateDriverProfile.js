@@ -17,7 +17,9 @@ export async function updateDriverProfile(uid, section, data) {
     const updates = {};
 
     Object.entries(data).forEach(([key, value]) => {
-        updates[`${section}.${key}`] = value;
+        if (value !== undefined) {
+            updates[`${section}.${key}`] = value;
+        }
     });
 
     await updateDoc(driverRef, updates);

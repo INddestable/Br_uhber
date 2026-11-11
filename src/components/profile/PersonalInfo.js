@@ -1,127 +1,199 @@
+import { View, Text, StyleSheet } from "react-native";
 
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-} from "react-native";
-
+import ProfileSectionForm from "./ProfileSectionForm";
+import { updateDriverProfile } from "../../utils/updateDriverProfile";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 
-export default function PersonalInfo({ driver }) {
+function getLatestAdultBirthDate() {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 18);
+    return date;
+}
+
+function parseBirthDate(dateString) {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function validateFullName(name) {
+    return (
+        name.trim().length > 0 &&
+        name.length <= 50 &&
+        /^[\p{L}\s]+$/u.test(name)
+    );
+}
+
+function validateDocumentNumber(documentNumber) {
+    return /^\d{6,10}$/.test(documentNumber || "");
+}
+
+function validatePhone(phone) {
+    return /^\d{10}$/.test(phone || "");
+}
+
+function validateBirthDate(birthDate) {
+    if (!birthDate) return false;
+
+    const birth = parseBirthDate(birthDate);
+    return birth <= getLatestAdultBirthDate();
+}
+
+export default function PersonalInfo({ driver, onSaved }) {
+    const { user } = useAuth();
     const { colors } = useTheme();
     const { t } = useTranslation();
 
-    const personalData = driver.personalData;
-
-    const fields = [
+    const genderOptions = [
+        { value: "male", label: t("personalData.gender.male") },
+        { value: "female", label: t("personalData.gender.female") },
+        { value: "other", label: t("personalData.gender.other") },
         {
-            label: t("profile.personal.fullName"),
-            value: personalData.fullName,
-        },
-        {
-            label: t("profile.personal.documentNumber"),
-            value: personalData.documentNumber,
-        },
-        {
-            label: t("profile.personal.phone"),
-            value: personalData.phone,
-        },
-        {
-            label: t("profile.personal.email"),
-            value: personalData.email,
-        },
-        {
-            label: t("profile.personal.birthDate"),
-            value: personalData.birthDate,
-        },
-        {
-            label: t("profile.personal.gender"),
-            value: t(`profile.personal.genders.${personalData.gender}`),
+            value: "preferNotToSay",
+            label: t("personalData.gender.preferNotToSay"),
         },
     ];
 
-    return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
+    const languageOptions = [
+        { value: "es", label: t("personalData.language.spanish") },
+        { value: "en", label: t("personalData.language.english") },
+    ];
+
+    const fields = [
+        {
+            key: "fullName",
+            label: t("profile.personal.fullName"),
+        },
+        {
+            key: "documentNumber",
+            label: t("profile.personal.documentNumber"),
+            keyboardType: "numeric",
+        },
+        {
+            key: "phone",
+            label: t("profile.personal.phone"),
+            keyboardType: "numeric",
+        },
+        {
+            key: "email",
+            label: t("profile.personal.email"),
+            readOnly: true,
+        },
+        {
+            key: "birthDate",
+            label: t("profile.personal.birthDate"),
+            type: "date",
+            maximumDate: getLatestAdultBirthDate(),
+        },
+        {
+            key: "gender",
+            label: t("profile.personal.gender"),
+            type: "select",
+            options: genderOptions,
+        },
+        {
+            key: "language",
+            label: t("personalData.language.title"),
+            type: "select",
+            options: languageOptions,
+        },
+    ];
+
+    const photos = [
+        {
+            key: "profilePhoto",
+            label: t("personalData.profilePhoto"),
+            folder: "profiles",
+        },
+    ];
+
+    async function handleSave(data) {
+        const fullName = data.fullName?.trim() || "";
+
+        if (!validateFullName(fullName)) {
+            throw new Error(t("personalData.errors.fullName"));
+        }
+
+        if (!validateDocumentNumber(data.documentNumber)) {
+            throw new Error(t("personalData.errors.documentNumber"));
+        }
+
+        if (!validatePhone(data.phone)) {
+            throw new Error(t("personalData.errors.phone"));
+        }
+
+        if (!validateBirthDate(data.birthDate)) {
+            throw new Error(t("personalData.errors.birthDate"));
+        }
+
+        if (!genderOptions.some(option => option.value === data.gender)) {
+            throw new Error(t("personalData.errors.gender"));
+        }
+
+        if (!languageOptions.some(option => option.value === data.language)) {
+            throw new Error(t("personalData.errors.language"));
+        }
+
+        if (!data.profilePhoto?.publicId) {
+            throw new Error(t("personalData.errors.profilePhoto"));
+        }
+
+        const savedData = {
+            fullName,
+            documentNumber: data.documentNumber,
+            phone: data.phone,
+            birthDate: data.birthDate,
+            gender: data.gender,
+            language: data.language,
+            profilePhoto: data.profilePhoto,
+        };
+
+        await updateDriverProfile(user.uid, "personalData", savedData);
+        onSaved?.(savedData);
+    }
+
+    const footer = (
+        <View
+            style={[
+                styles.paymentCard,
+                { backgroundColor: colors.surface },
+            ]}
         >
-            <Text style={[styles.title, { color: colors.text }]}>
-                {t("profile.personal.title")}
+            <Text style={[styles.paymentTitle, { color: colors.text }]}>
+                {t("profile.personal.mercadoPago.title")}
             </Text>
 
-            {fields.map((field, index) => (
-                <View
-                    key={index}
-                    style={[
-                        styles.field,
-                        { backgroundColor: colors.surface },
-                    ]}
-                >
-                    <Text style={{ color: colors.secondaryText }}>
-                        {field.label}
-                    </Text>
-
-                    <Text style={[styles.value, { color: colors.text }]}>
-                        {field.value || "-"}
-                    </Text>
-                </View>
-            ))}
+            <Text style={{ color: colors.secondaryText }}>
+                {t("profile.personal.mercadoPago.description")}
+            </Text>
 
             <View
                 style={[
-                    styles.paymentCard,
-                    { backgroundColor: colors.surface },
+                    styles.status,
+                    { backgroundColor: colors.background },
                 ]}
             >
-                <Text style={[styles.paymentTitle, { color: colors.text }]}>
-                    {t("profile.personal.mercadoPago.title")}
-                </Text>
-
                 <Text style={{ color: colors.secondaryText }}>
-                    {t("profile.personal.mercadoPago.description")}
+                    {t("profile.personal.mercadoPago.status")}
                 </Text>
-
-                <View
-                    style={[
-                        styles.status,
-                        { backgroundColor: colors.background },
-                    ]}
-                >
-                    <Text style={{ color: colors.secondaryText }}>
-                        {t("profile.personal.mercadoPago.status")}
-                    </Text>
-                </View>
             </View>
-        </ScrollView>
+        </View>
+    );
+
+    return (
+        <ProfileSectionForm
+            title={t("profile.personal.title")}
+            initialData={driver.personalData}
+            fields={fields}
+            photos={photos}
+            onSave={handleSave}
+            footer={footer}
+        />
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        width: "100%",
-    },
-    content: {
-        padding: 16,
-        gap: 12,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "700",
-        marginBottom: 4,
-    },
-    field: {
-        padding: 14,
-        borderRadius: 10,
-        gap: 6,
-    },
-    value: {
-        fontSize: 16,
-        fontWeight: "600",
-    },
     paymentCard: {
         padding: 16,
         borderRadius: 12,

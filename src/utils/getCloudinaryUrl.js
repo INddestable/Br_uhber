@@ -1,4 +1,8 @@
 export function getCloudinaryUrl(photo) {
+    if (typeof photo?.secureUrl === "string" && photo.secureUrl.startsWith("https://")) {
+        return photo.secureUrl;
+    }
+
     if (!photo?.publicId) {
         return null;
     }

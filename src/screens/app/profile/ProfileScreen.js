@@ -24,6 +24,16 @@ export default function ProfileScreen() {
 
     const [activeTab, setActiveTab] = useState("personal");
 
+    function updateSection(section, data) {
+        setDriver(current => ({
+            ...current,
+            [section]: {
+                ...current[section],
+                ...data,
+            },
+        }));
+    }
+
     useEffect(() => {
         if (authLoading) return;
 
@@ -94,15 +104,24 @@ export default function ProfileScreen() {
             />
 
             {activeTab === "personal" && (
-                <PersonalInfo driver={driver} />
+                <PersonalInfo
+                    driver={driver}
+                    onSaved={data => updateSection("personalData", data)}
+                />
             )}
 
             {activeTab === "vehicle" && (
-                <VehicleInfo driver={driver} />
+                <VehicleInfo
+                    driver={driver}
+                    onSaved={data => updateSection("vehicle", data)}
+                />
             )}
 
             {activeTab === "documents" && (
-                <DocumentsInfo driver={driver} />
+                <DocumentsInfo
+                    driver={driver}
+                    onSaved={data => updateSection("documents", data)}
+                />
             )}
 
         </View>

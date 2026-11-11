@@ -59,7 +59,8 @@
             "email": "Enter a valid email address.",
             "birthDate": "You must be at least 18 years old.",
             "profilePhoto": "A profile photo is required.",
-            "gender": "Select a gender option."
+            "gender": "Select a gender option.",
+            "language": "Select a language."
         }
     },
     "pending": {
@@ -158,6 +159,7 @@
         "licenseNumber": "Enter your license number.",
         "photo": "You must attach this photo.",
         "expiration": "The expiration date must be later than today.",
+        "soatRange": "The SOAT must expire after today and within the next 365 days.",
         "email": "Enter a valid email address.",
         "terms": "You must accept the terms and conditions."
         },
@@ -202,7 +204,9 @@
             "successMessage": "Your changes were saved successfully.",
             "changePhoto": "Change photo",
             "photoUploaded": "Photo uploaded",
-            "noPhoto": "No photo"
+            "noPhoto": "No photo",
+            "yes": "Yes",
+            "no": "No"
         },
         "vehicle": {
             "title": "Vehicle information",
@@ -224,7 +228,8 @@
             "soatPhoto": "SOAT photo",
             "paymentEmail": "Payment email",
             "acceptedTerms": "Accepted terms",
-            "technicalReviewPhoto": "Vehicle inspection photo"
+            "technicalReviewPhoto": "Vehicle inspection photo",
+            "technicalReviewExpiration": "Vehicle inspection expiration"
         }
     }
 }

@@ -59,7 +59,8 @@
             "email": "Ingresa un correo electrónico válido.",
             "birthDate": "Debes tener al menos 18 años.",
             "profilePhoto": "La fotografía de perfil es obligatoria.",
-            "gender": "Selecciona una opción de género."
+            "gender": "Selecciona una opción de género.",
+            "language": "Selecciona un idioma."
         }
     },
     "pending": {
@@ -158,6 +159,7 @@
         "licenseNumber": "Ingresa el número de tu licencia.",
         "photo": "Debes adjuntar esta fotografía.",
         "expiration": "La fecha de vencimiento debe ser posterior a hoy.",
+        "soatRange": "El SOAT debe vencer después de hoy y dentro de los próximos 365 días.",
         "email": "Ingresa un correo electrónico válido.",
         "terms": "Debes aceptar los términos y condiciones."
         },
@@ -202,7 +204,9 @@
             "successMessage": "Tus cambios se guardaron correctamente.",
             "changePhoto": "Cambiar fotografía",
             "photoUploaded": "Fotografía cargada",
-            "noPhoto": "Sin fotografía"
+            "noPhoto": "Sin fotografía",
+            "yes": "Sí",
+            "no": "No"
         },
         "vehicle": {
             "title": "Información del vehículo",
@@ -224,7 +228,8 @@
             "soatPhoto": "Fotografía del SOAT",
             "paymentEmail": "Correo de pagos",
             "acceptedTerms": "Términos aceptados",
-            "technicalReviewPhoto": "Fotografía de revisión técnico-mecánica"
+            "technicalReviewPhoto": "Fotografía de revisión técnico-mecánica",
+            "technicalReviewExpiration": "Vencimiento de la revisión técnico-mecánica"
         }
     }
 }

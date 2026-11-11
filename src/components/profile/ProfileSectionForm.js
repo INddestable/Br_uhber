@@ -28,6 +28,7 @@ export default function ProfileSectionForm({
     fields,
     photos,
     onSave,
+    footer,
 }) {
     const { colors } = useTheme();
     const { t } = useTranslation();
@@ -69,14 +70,9 @@ export default function ProfileSectionForm({
 
             updateField(photo.key, uploadedPhoto);
         } catch (error) {
-            console.log("ERROR AL GUARDAR:", error);
-            console.log("ERROR MESSAGE:", error?.message);
-            console.log("ERROR CODE:", error?.code);
-            console.log("ERROR STACK:", error?.stack);
-        
             Alert.alert(
                 "Error",
-                error?.message || "No se pudieron guardar los cambios."
+                error?.message || t("profile.edit.noPhoto")
             );
         } finally {
             setLoading(false);
@@ -105,6 +101,24 @@ export default function ProfileSectionForm({
     function cancelEditing() {
         setForm(initialData);
         setEditing(false);
+    }
+
+    function getFieldText(field) {
+        const value = form[field.key];
+
+        if (field.options) {
+            const selectedOption = field.options.find(
+                option => option.value === value
+            );
+
+            return selectedOption?.label || value || "-";
+        }
+
+        if (typeof value === "boolean") {
+            return value ? t("profile.edit.yes") : t("profile.edit.no");
+        }
+
+        return value || "-";
     }
 
     const styles = StyleSheet.create({
@@ -172,6 +186,16 @@ export default function ProfileSectionForm({
             color: "#FFFFFF",
             fontWeight: "700",
         },
+        options: {
+            gap: 8,
+        },
+        option: {
+            borderWidth: 1,
+            borderRadius: 10,
+            minHeight: 44,
+            paddingHorizontal: 14,
+            justifyContent: "center",
+        },
     });
 
     return (
@@ -224,6 +248,8 @@ export default function ProfileSectionForm({
                                         }
                                         mode="date"
                                         display="default"
+                                        minimumDate={field.minimumDate}
+                                        maximumDate={field.maximumDate}
                                         onChange={(event, selectedDate) => {
                                             setDatePicker(null);
 
@@ -245,6 +271,42 @@ export default function ProfileSectionForm({
                                     />
                                 )}
                             </>
+                        ) : field.type === "select" ? (
+                            <View style={styles.options}>
+                                {field.options.map(option => {
+                                    const selected = form[field.key] === option.value;
+
+                                    return (
+                                        <Pressable
+                                            key={option.value}
+                                            onPress={() =>
+                                                updateField(field.key, option.value)
+                                            }
+                                            style={[
+                                                styles.option,
+                                                {
+                                                    borderColor: selected
+                                                        ? colors.primary
+                                                        : colors.border,
+                                                    backgroundColor: selected
+                                                        ? colors.primary
+                                                        : colors.background,
+                                                },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={{
+                                                    color: selected
+                                                        ? "#FFFFFF"
+                                                        : colors.text,
+                                                }}
+                                            >
+                                                {option.label}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
                         ) : (
                             <TextInput
                                 value={String(form[field.key] ?? "")}
@@ -265,7 +327,7 @@ export default function ProfileSectionForm({
                         )
                     ) : (
                         <Text style={[styles.value, { color: colors.text }]}>
-                            {form[field.key] || "-"}
+                            {getFieldText(field)}
                         </Text>
                     )}
                 </View>
@@ -274,9 +336,6 @@ export default function ProfileSectionForm({
             {photos.map(photo => {
                 const imageData = form[photo.key];
                 const imageUrl = getCloudinaryUrl(imageData);
-
-                console.log("IMAGEN:", photo.key, imageData);
-                console.log("URL GENERADA:", imageUrl);
 
                 return (
                     <View
@@ -295,12 +354,6 @@ export default function ProfileSectionForm({
                                 source={{ uri: imageUrl }}
                                 style={styles.image}
                                 resizeMode="cover"
-                                onError={event => {
-                                    console.log(
-                                        "ERROR CARGANDO IMAGEN:",
-                                        event.nativeEvent
-                                    );
-                                }}
                             />
                         )}
 
@@ -354,6 +407,8 @@ export default function ProfileSectionForm({
                     </Pressable>
                 </View>
             )}
+
+            {!editing && footer}
         </ScrollView>
     );
 }
