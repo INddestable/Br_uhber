@@ -169,5 +169,30 @@
         "earnings": "Earnings",
         "profile": "Profile",
         "settings": "Settings"
+    },
+    "profile": {
+        "tabs": {
+            "personal": "Personal",
+            "vehicle": "Vehicle",
+            "documents": "Documents"
+        },
+        "personal": {
+            "title": "Personal information",
+            "fullName": "Full name",
+            "documentNumber": "Identification number",
+            "phone": "Phone",
+            "email": "Email address",
+            "birthDate": "Date of birth",
+            "gender": "Gender",
+            "genders": {
+                "male": "Male",
+                "female": "Female"
+            },
+            "mercadoPago": {
+                "title": "Mercado Pago",
+                "description": "Link your account to receive your trip earnings.",
+                "status": "Account not linked"
+            }
+        }
     }
 }

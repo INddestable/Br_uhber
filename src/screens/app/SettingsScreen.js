@@ -32,11 +32,11 @@ export default function SettingsScreen() {
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            padding: 24,
+            padding: 25,
         },
         title: {
             fontSize: 32,
-            marginTop: 40,
+            marginTop: 20,
             marginBottom: 35,
             fontFamily: typography.bold
         },

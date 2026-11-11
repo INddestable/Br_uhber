@@ -169,5 +169,30 @@
         "earnings": "Ganancias",
         "profile": "Perfil",
         "settings": "Ajustes"
+    },
+    "profile": {
+        "tabs": {
+            "personal": "Personal",
+            "vehicle": "Vehículo",
+            "documents": "Documentos"
+        },
+        "personal": {
+            "title": "Información personal",
+            "fullName": "Nombre completo",
+            "documentNumber": "Documento de identidad",
+            "phone": "Teléfono",
+            "email": "Correo electrónico",
+            "birthDate": "Fecha de nacimiento",
+            "gender": "Género",
+            "genders": {
+                "male": "Masculino",
+                "female": "Femenino"
+            },
+            "mercadoPago": {
+                "title": "Mercado Pago",
+                "description": "Vincula tu cuenta para recibir las ganancias de tus viajes.",
+                "status": "Cuenta sin vincular"
+            }
+        }
     }
 }
