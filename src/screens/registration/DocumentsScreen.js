@@ -1,4 +1,5 @@
 
+/* eslint-disable react-hooks/static-components */
 import { useState } from "react";
 import {
     View,

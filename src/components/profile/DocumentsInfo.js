@@ -55,12 +55,18 @@ export default function DocumentsInfo({ driver, onSaved }) {
             key: "licenseNumber",
             label: t("profile.documents.licenseNumber"),
             keyboardType: "numeric",
+            maxLength: 30,
+            sanitize: value => String(value).replace(/\D/g, "").slice(0, 30),
+            hint: t("documents.errors.licenseNumber"),
+            validate: value => String(value || "").length > 0 ? null : t("documents.errors.licenseNumber"),
         },
         {
             key: "licenseExpiration",
             label: t("profile.documents.licenseExpiration"),
             type: "date",
             minimumDate: tomorrow(),
+            hint: t("documents.errors.expiration"),
+            validate: value => isFutureDate(value) ? null : t("documents.errors.expiration"),
         },
         {
             key: "soatExpiration",
@@ -68,11 +74,16 @@ export default function DocumentsInfo({ driver, onSaved }) {
             type: "date",
             minimumDate: tomorrow(),
             maximumDate: soatLimit(),
+            hint: t("documents.errors.soatRange"),
+            validate: value => isFutureDate(value) && isWithinSoatLimit(value) ? null : t("documents.errors.soatRange"),
         },
         {
             key: "paymentEmail",
             label: t("profile.documents.paymentEmail"),
             keyboardType: "email-address",
+            autoCapitalize: "none",
+            hint: t("documents.errors.email"),
+            validate: value => isValidEmail(value?.trim() || "") ? null : t("documents.errors.email"),
         },
         {
             key: "acceptedTerms",
@@ -87,6 +98,8 @@ export default function DocumentsInfo({ driver, onSaved }) {
             label: t("profile.documents.technicalReviewExpiration"),
             type: "date",
             minimumDate: tomorrow(),
+            hint: t("documents.errors.expiration"),
+            validate: value => isFutureDate(value) ? null : t("documents.errors.expiration"),
         });
     }
 
@@ -95,11 +108,15 @@ export default function DocumentsInfo({ driver, onSaved }) {
             key: "licensePhoto",
             label: t("profile.documents.licensePhoto"),
             folder: "licenses",
+            hint: t("documents.errors.photo"),
+            validate: value => value?.publicId ? null : t("documents.errors.photo"),
         },
         {
             key: "soatPhoto",
             label: t("profile.documents.soatPhoto"),
             folder: "soat",
+            hint: t("documents.errors.photo"),
+            validate: value => value?.publicId ? null : t("documents.errors.photo"),
         },
     ];
 
@@ -108,6 +125,8 @@ export default function DocumentsInfo({ driver, onSaved }) {
             key: "technicalReviewPhoto",
             label: t("profile.documents.technicalReviewPhoto"),
             folder: "technical-reviews",
+            hint: t("documents.errors.photo"),
+            validate: value => !requiresTechnicalReview || value?.publicId ? null : t("documents.errors.photo"),
         });
     }
 

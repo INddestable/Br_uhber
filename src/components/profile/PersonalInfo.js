@@ -64,16 +64,28 @@ export default function PersonalInfo({ driver, onSaved }) {
         {
             key: "fullName",
             label: t("profile.personal.fullName"),
+            maxLength: 50,
+            sanitize: value => String(value).replace(/[^\p{L}\s]/gu, "").slice(0, 50),
+            hint: t("personalData.errors.fullName"),
+            validate: value => validateFullName(value || "") ? null : t("personalData.errors.fullName"),
         },
         {
             key: "documentNumber",
             label: t("profile.personal.documentNumber"),
             keyboardType: "numeric",
+            maxLength: 10,
+            sanitize: value => String(value).replace(/\D/g, "").slice(0, 10),
+            hint: t("personalData.errors.documentNumber"),
+            validate: value => validateDocumentNumber(value) ? null : t("personalData.errors.documentNumber"),
         },
         {
             key: "phone",
             label: t("profile.personal.phone"),
             keyboardType: "numeric",
+            maxLength: 10,
+            sanitize: value => String(value).replace(/\D/g, "").slice(0, 10),
+            hint: t("personalData.errors.phone"),
+            validate: value => validatePhone(value) ? null : t("personalData.errors.phone"),
         },
         {
             key: "email",
@@ -85,18 +97,24 @@ export default function PersonalInfo({ driver, onSaved }) {
             label: t("profile.personal.birthDate"),
             type: "date",
             maximumDate: getLatestAdultBirthDate(),
+            hint: t("personalData.errors.birthDate"),
+            validate: value => validateBirthDate(value) ? null : t("personalData.errors.birthDate"),
         },
         {
             key: "gender",
             label: t("profile.personal.gender"),
             type: "select",
             options: genderOptions,
+            hint: t("personalData.errors.gender"),
+            validate: value => genderOptions.some(option => option.value === value) ? null : t("personalData.errors.gender"),
         },
         {
             key: "language",
             label: t("personalData.language.title"),
             type: "select",
             options: languageOptions,
+            hint: t("personalData.errors.language"),
+            validate: value => languageOptions.some(option => option.value === value) ? null : t("personalData.errors.language"),
         },
     ];
 
@@ -105,6 +123,8 @@ export default function PersonalInfo({ driver, onSaved }) {
             key: "profilePhoto",
             label: t("personalData.profilePhoto"),
             folder: "profiles",
+            hint: t("personalData.errors.profilePhoto"),
+            validate: value => value?.publicId ? null : t("personalData.errors.profilePhoto"),
         },
     ];
 

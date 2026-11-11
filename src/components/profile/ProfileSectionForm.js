@@ -36,18 +36,37 @@ export default function ProfileSectionForm({
     const [editing, setEditing] = useState(false);
     const [form, setForm] = useState(initialData);
     const [loading, setLoading] = useState(false);
+    const [touched, setTouched] = useState({});
+    const [showErrors, setShowErrors] = useState(false);
 
     const [datePicker, setDatePicker] = useState(null);
 
     useEffect(() => {
+        // This local draft must follow the parent data after a save.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setForm(initialData);
     }, [initialData]);
 
     function updateField(key, value) {
+        const field = fields.find(item => item.key === key);
+        const nextValue = field?.sanitize ? field.sanitize(value) : value;
+
         setForm(previous => ({
             ...previous,
-            [key]: value,
+            [key]: nextValue,
         }));
+    }
+
+    function markTouched(key) {
+        setTouched(previous => ({ ...previous, [key]: true }));
+    }
+
+    function getError(item) {
+        return item?.validate ? item.validate(form[item.key], form) : null;
+    }
+
+    function isErrorVisible(key, error) {
+        return Boolean(error) && (showErrors || touched[key]);
     }
 
     async function selectPhoto(photo) {
@@ -69,6 +88,7 @@ export default function ProfileSectionForm({
             );
 
             updateField(photo.key, uploadedPhoto);
+            markTouched(photo.key);
         } catch (error) {
             Alert.alert(
                 "Error",
@@ -80,12 +100,25 @@ export default function ProfileSectionForm({
     }
 
     async function saveChanges() {
+        setShowErrors(true);
+
+        const hasFieldError = fields.some(field =>
+            !field.readOnly && getError(field)
+        );
+        const hasPhotoError = photos.some(photo => getError(photo));
+
+        if (hasFieldError || hasPhotoError) {
+            return;
+        }
+
         try {
             setLoading(true);
 
             await onSave(form);
 
             setEditing(false);
+            setTouched({});
+            setShowErrors(false);
 
             Alert.alert(
                 t("profile.edit.successTitle"),
@@ -101,6 +134,8 @@ export default function ProfileSectionForm({
     function cancelEditing() {
         setForm(initialData);
         setEditing(false);
+        setTouched({});
+        setShowErrors(false);
     }
 
     function getFieldText(field) {
@@ -157,6 +192,14 @@ export default function ProfileSectionForm({
             fontSize: 16,
             fontWeight: "600",
         },
+        hint: {
+            fontSize: 13,
+            lineHeight: 18,
+        },
+        error: {
+            color: "#EF4444",
+            fontSize: 13,
+        },
         photo: {
             gap: 10,
             padding: 14,
@@ -210,7 +253,11 @@ export default function ProfileSectionForm({
                 </Text>
 
                 {!editing && (
-                    <Pressable onPress={() => setEditing(true)}>
+                    <Pressable onPress={() => {
+                        setTouched({});
+                        setShowErrors(false);
+                        setEditing(true);
+                    }}>
                         <Text style={{ color: colors.primary }}>
                             {t("profile.edit.edit")}
                         </Text>
@@ -218,20 +265,33 @@ export default function ProfileSectionForm({
                 )}
             </View>
 
-            {fields.map(field => (
+            {fields.map(field => {
+                const error = getError(field);
+                const showFieldError = editing && isErrorVisible(field.key, error);
+
+                return (
                 <View key={field.key} style={styles.field}>
                     <Text style={{ color: colors.secondaryText }}>
                         {field.label}
                     </Text>
 
+                    {editing && field.hint && (
+                        <Text style={[styles.hint, { color: colors.secondaryText }]}>
+                            {field.hint}
+                        </Text>
+                    )}
+
                     {editing && !field.readOnly ? (
                         field.type === "date" ? (
                             <>
                                 <Pressable
-                                    onPress={() => setDatePicker(field.key)}
+                                    onPress={() => {
+                                        markTouched(field.key);
+                                        setDatePicker(field.key);
+                                    }}
                                     style={[
                                         styles.input,
-                                        { borderColor: colors.border },
+                                        { borderColor: showFieldError ? "#EF4444" : colors.border },
                                     ]}
                                 >
                                     <Text style={{ color: colors.text }}>
@@ -279,9 +339,10 @@ export default function ProfileSectionForm({
                                     return (
                                         <Pressable
                                             key={option.value}
-                                            onPress={() =>
-                                                updateField(field.key, option.value)
-                                            }
+                                            onPress={() => {
+                                                markTouched(field.key);
+                                                updateField(field.key, option.value);
+                                            }}
                                             style={[
                                                 styles.option,
                                                 {
@@ -313,14 +374,17 @@ export default function ProfileSectionForm({
                                 onChangeText={value =>
                                     updateField(field.key, value)
                                 }
+                                onBlur={() => markTouched(field.key)}
                                 keyboardType={field.keyboardType || "default"}
+                                maxLength={field.maxLength}
+                                autoCapitalize={field.autoCapitalize || "sentences"}
                                 placeholder={field.label}
                                 placeholderTextColor={colors.secondaryText}
                                 style={[
                                     styles.input,
                                     {
                                         color: colors.text,
-                                        borderColor: colors.border,
+                                        borderColor: showFieldError ? "#EF4444" : colors.border,
                                     },
                                 ]}
                             />
@@ -330,12 +394,17 @@ export default function ProfileSectionForm({
                             {getFieldText(field)}
                         </Text>
                     )}
+
+                    {showFieldError && <Text style={styles.error}>{error}</Text>}
                 </View>
-            ))}
+                );
+            })}
 
             {photos.map(photo => {
                 const imageData = form[photo.key];
                 const imageUrl = getCloudinaryUrl(imageData);
+                const photoError = getError(photo);
+                const showPhotoError = editing && isErrorVisible(photo.key, photoError);
 
                 return (
                     <View
@@ -373,6 +442,8 @@ export default function ProfileSectionForm({
                                 </Text>
                             </Pressable>
                         )}
+
+                        {showPhotoError && <Text style={styles.error}>{photoError}</Text>}
                     </View>
                 );
             })}

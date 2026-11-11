@@ -49,30 +49,42 @@ export default function VehicleInfo({ driver, onSaved }) {
     ];
 
     const fields = [
-        { key: "vehicleBrand", label: t("profile.vehicle.brand") },
-        { key: "vehicleModel", label: t("profile.vehicle.model") },
+        { key: "vehicleBrand", label: t("profile.vehicle.brand"), maxLength: 30, hint: t("vehicle.errors.brand"), validate: value => validateVehicleBrand(value || "") ? null : t("vehicle.errors.brand") },
+        { key: "vehicleModel", label: t("profile.vehicle.model"), maxLength: 30, hint: t("vehicle.errors.model"), validate: value => validateVehicleModel(value || "") ? null : t("vehicle.errors.model") },
         {
             key: "vehicleYear",
             label: t("profile.vehicle.year"),
             keyboardType: "numeric",
+            maxLength: 4,
+            sanitize: value => String(value).replace(/\D/g, "").slice(0, 4),
+            hint: t("vehicle.errors.year"),
+            validate: value => validateVehicleYear(value) ? null : t("vehicle.errors.year"),
         },
-        { key: "vehiclePlate", label: t("profile.vehicle.plate") },
+        { key: "vehiclePlate", label: t("profile.vehicle.plate"), maxLength: 6, autoCapitalize: "characters", sanitize: value => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6), hint: t("vehicle.errors.plate"), validate: value => validateVehiclePlate(String(value || "").toUpperCase()) ? null : t("vehicle.errors.plate") },
         {
             key: "vehicleColor",
             label: t("profile.vehicle.color"),
             type: "select",
             options: colorOptions,
+            hint: t("vehicle.errors.color"),
+            validate: value => colorOptions.some(option => option.value === value) ? null : t("vehicle.errors.color"),
         },
         {
             key: "vehicleCapacity",
             label: t("profile.vehicle.capacity"),
             keyboardType: "numeric",
+            maxLength: 2,
+            sanitize: value => String(value).replace(/\D/g, "").slice(0, 2),
+            hint: t("vehicle.errors.capacity"),
+            validate: (value, form) => validateVehicleCapacity(value, form.vehicleCategory) ? null : t("vehicle.errors.capacity"),
         },
         {
             key: "vehicleCategory",
             label: t("profile.vehicle.category"),
             type: "select",
             options: categoryOptions,
+            hint: t("vehicle.errors.category"),
+            validate: value => validateVehicleCategory(value) ? null : t("vehicle.errors.category"),
         },
     ];
 
@@ -81,6 +93,8 @@ export default function VehicleInfo({ driver, onSaved }) {
             key: "vehiclePhoto",
             label: t("profile.vehicle.photo"),
             folder: "vehicles",
+            hint: t("vehicle.errors.photo"),
+            validate: value => value?.publicId ? null : t("vehicle.errors.photo"),
         },
     ];
 
