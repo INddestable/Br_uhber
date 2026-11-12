@@ -1,5 +1,8 @@
+import { calculateFare, PRICING } from "../config/pricing";
+
 const passengerNames = ["Sofía", "Carlos", "Valentina", "Mateo", "Lucía", "Samuel"];
-const paymentMethods = ["cash", "card"];
+const paymentMethods = ["cash", "electronic"];
+const categories = ["economy", "economy", "economy", "economy", "xl", "xl", "premium"];
 const ROUTING_URL = "https://router.project-osrm.org/route/v1/driving";
 let lastRouteRequestAt = 0;
 
@@ -37,11 +40,11 @@ export async function getDrivingRoute(from, to) {
     }
 }
 
-function nearbyPoint(origin, minOffset = 0.008, maxOffset = 0.025) {
+function nearbyPoint(origin, minDistanceKm, maxDistanceKm = minDistanceKm) {
     const angle = Math.random() * Math.PI * 2;
-    const distance = minOffset + Math.random() * (maxOffset - minOffset);
-    const latitudeScale = distance / 111;
-    const longitudeScale = distance / (111 * Math.max(Math.cos(origin.latitude * Math.PI / 180), 0.2));
+    const distanceKm = minDistanceKm + Math.random() * (maxDistanceKm - minDistanceKm);
+    const latitudeScale = distanceKm / 110.574;
+    const longitudeScale = distanceKm / (111.32 * Math.max(Math.cos(origin.latitude * Math.PI / 180), 0.2));
 
     return {
         latitude: origin.latitude + Math.cos(angle) * latitudeScale,
@@ -49,20 +52,56 @@ function nearbyPoint(origin, minOffset = 0.008, maxOffset = 0.025) {
     };
 }
 
+function haversineDistanceKm(from, to) {
+    const radians = (degrees) => degrees * Math.PI / 180;
+    const latitudeDelta = radians(to.latitude - from.latitude);
+    const longitudeDelta = radians(to.longitude - from.longitude);
+    const value = Math.sin(latitudeDelta / 2) ** 2
+        + Math.cos(radians(from.latitude)) * Math.cos(radians(to.latitude))
+        * Math.sin(longitudeDelta / 2) ** 2;
+    return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+function estimateRoadDistance(from, to) {
+    return Number((haversineDistanceKm(from, to) * 1.3).toFixed(1));
+}
+
 export function createRideRequest(driverLocation) {
-    const pickupLocation = nearbyPoint(driverLocation, 0.006, 0.018);
-    const destination = nearbyPoint(pickupLocation, 0.02, 0.055);
-    const tripDistance = Number((2 + Math.random() * 6).toFixed(1));
+    // Generate a road estimate from 200–500 m; account for the road-vs-straight-line factor.
+    const pickupRoadDistanceKm = 0.2 + Math.random() * 0.3;
+    const pickupStraightDistanceKm = pickupRoadDistanceKm / 1.3;
+    const pickupLocation = nearbyPoint(driverLocation, pickupStraightDistanceKm);
+    // A 0.8 km straight-line minimum becomes at least 1.0 km after road estimate/rounding.
+    const destination = nearbyPoint(pickupLocation, 0.8, 4.5);
+    const pickupDistance = estimateRoadDistance(driverLocation, pickupLocation);
+    const tripDistance = Math.max(1, estimateRoadDistance(pickupLocation, destination));
+    const estimatedDuration = Math.max(5, Math.round(tripDistance * 3.2 + 2));
+    const category = categories[Math.floor(Math.random() * categories.length)];
+    const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+    const tipOptions = PRICING.simulatedTipOptions;
+    const tip = tipOptions[Math.floor(Math.random() * tipOptions.length)];
+    const fareEstimate = calculateFare({
+        distanceKm: tripDistance,
+        durationMin: estimatedDuration,
+        category,
+        tip,
+    });
 
     return {
         id: `trip_${Date.now()}`,
+        createdAt: Date.now(),
         passengerName: passengerNames[Math.floor(Math.random() * passengerNames.length)],
         passengerRating: Number((4.6 + Math.random() * 0.4).toFixed(1)),
-        pickupDistance: Number((0.5 + Math.random() * 3.5).toFixed(1)),
+        pickupDistance,
         tripDistance,
-        estimatedDuration: Math.round(tripDistance * 3.2),
-        estimatedEarnings: Math.round((5000 + tripDistance * 1400) / 500) * 500,
-        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+        estimatedDuration,
+        category,
+        tip,
+        paymentMethod,
+        fare: fareEstimate.fare,
+        commission: fareEstimate.commission,
+        commissionRate: PRICING.commissionRate,
+        driverEarnings: fareEstimate.driverEarnings,
         pickupLocation,
         destination,
     };

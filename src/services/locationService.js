@@ -50,7 +50,10 @@ export async function getCurrentDriverLocation({ forceFresh = false } = {}) {
             longitude: position.coords.longitude,
         };
     } catch {
-        if (!isUsableLastKnown || forceFresh || Date.now() - lastKnown.timestamp > 30000) {
+        // When the fresh GPS fix times out, a recent accurate device fix still
+        // represents the driver's location. Permissions and GPS services were
+        // checked above, and this fallback is never used for forced recentering.
+        if (!isUsableLastKnown || forceFresh) {
             throw new Error("LOCATION_TIMEOUT");
         }
         return {

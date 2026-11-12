@@ -3,7 +3,6 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
 
-const defaultLocation = { latitude: 4.6533, longitude: -74.0837 };
 const MAPLIBRE_VERSION = "6.17.0";
 
 function createMapHTML() {
@@ -81,15 +80,19 @@ function fitRoute(payload) {
 function renderPayload(payload) {
   lastPayload = payload;
   if (!mapLoaded || !map) return;
-  const location = payload.location || { latitude: ${defaultLocation.latitude}, longitude: ${defaultLocation.longitude} };
-  const driverPosition = [location.longitude, location.latitude];
-  if (!driverMarker) {
-    driverMarker = new maplibregl.Marker({ element: createMarker('car-marker'), anchor: 'center' })
-      .setLngLat(driverPosition).addTo(map);
-  } else driverMarker.setLngLat(driverPosition);
-  if (payload.location && !centeredOnGps) {
-    map.jumpTo({ center: driverPosition, zoom: 15 });
-    centeredOnGps = true;
+  if (payload.location) {
+    const driverPosition = [payload.location.longitude, payload.location.latitude];
+    if (!driverMarker) {
+      driverMarker = new maplibregl.Marker({ element: createMarker('car-marker'), anchor: 'center' })
+        .setLngLat(driverPosition).addTo(map);
+    } else driverMarker.setLngLat(driverPosition);
+    if (!centeredOnGps) {
+      map.jumpTo({ center: driverPosition, zoom: 15 });
+      centeredOnGps = true;
+    }
+  } else {
+    driverMarker?.remove();
+    driverMarker = null;
   }
 
   const ride = payload.ride;
@@ -129,8 +132,8 @@ try {
   map = new maplibregl.Map({
     container: 'map',
     style: styleUrl(lastPayload.isDark),
-    center: [${defaultLocation.longitude}, ${defaultLocation.latitude}],
-    zoom: 12,
+    center: [0, 0],
+    zoom: 1,
     attributionControl: true,
     cooperativeGestures: false
   });

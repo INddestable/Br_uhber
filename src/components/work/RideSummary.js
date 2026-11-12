@@ -6,8 +6,9 @@ export default function RideSummary({ request, colors, typography, t, onClose })
         <View style={[styles.card, { backgroundColor: colors.card || colors.surface }]}>
             <View style={[styles.icon, { backgroundColor: "#E7F6EE" }]}><Ionicons name="checkmark" size={25} color="#23A675" /></View>
             <Text style={[styles.title, { color: colors.text, fontFamily: typography.bold }]}>{t("work.rideCompleted")}</Text>
-            <Text style={[styles.caption, { color: colors.secondaryText }]}>{request.passengerName} · {t("work.tripDistance", { distance: request.tripDistance })} · {t("work.duration", { duration: request.estimatedDuration })}</Text>
-            <Text style={[styles.earnings, { color: colors.primary, fontFamily: typography.bold }]}>{t("work.earnings", { amount: request.estimatedEarnings.toLocaleString() })}</Text>
+            <Text style={[styles.caption, { color: colors.secondaryText }]}>{request.passenger?.name || request.passengerName} · {t("work.tripDistance", { distance: request.distanceKm })} · {t("work.duration", { duration: request.durationMin })}</Text>
+            <Text style={[styles.earnings, { color: colors.primary, fontFamily: typography.bold }]}>{t("work.earnings", { amount: request.fare.toLocaleString("es-CO") })}</Text>
+            <Text style={[styles.caption, { color: colors.secondaryText }]}>{t("earnings.net")}: {t("work.earnings", { amount: request.driverEarnings.toLocaleString("es-CO") })}</Text>
             <Pressable onPress={onClose} style={[styles.button, { backgroundColor: colors.primary }]}><Text style={[styles.buttonText, { fontFamily: typography.bold }]}>{t("work.continueSearching")}</Text></Pressable>
         </View>
     );

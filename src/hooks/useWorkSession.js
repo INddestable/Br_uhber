@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { getCurrentDriverLocation, watchDriverLocation } from "../services/locationService";
 import { setDriverAvailability, updateDriverLocation } from "../services/availabilityService";
 import { createRideRequest, getDrivingRoute, interpolatePoint, interpolateRoute } from "../services/rideSimulationService";
-import { saveCompletedRide } from "../services/rideHistoryService";
+import { calculateFare, PRICING } from "../config/pricing";
+import { saveCompletedTrip } from "../services/tripService";
 
 const initialState = {
     status: "offline",
@@ -58,6 +59,7 @@ function reducer(state, action) {
                     progress: 0,
                     remainingDistance: state.request.pickupDistance,
                     startedAt: Date.now(),
+                    acceptedAt: Date.now(),
                     route: [state.location, state.request.pickupLocation],
                     routeReady: false,
                 },
@@ -90,18 +92,35 @@ function reducer(state, action) {
                     progress: 0,
                     remainingDistance: state.ride.request.tripDistance,
                     startedAt: Date.now(),
+                acceptedAt: state.ride.acceptedAt,
                     route: [state.ride.request.pickupLocation, state.ride.request.destination],
                     routeReady: false,
                 },
             };
         case "COMPLETE":
-            if (!state.ride || state.ride.phase !== "inProgress") return state;
+            if (!state.ride || state.ride.phase !== "inProgress" || state.ride.request.id !== action.rideId) return state;
             return {
                 ...state,
                 status: "searching",
                 location: state.ride.request.destination,
-                summary: state.ride.request,
+                summary: action.trip,
                 ride: null,
+                error: null,
+            };
+        case "FINALIZING":
+            if (!state.ride || state.ride.phase !== "inProgress" || state.ride.request.id !== action.rideId) return state;
+            return {
+                ...state,
+                location: state.ride.request.destination,
+                ride: { ...state.ride, progress: 1, remainingDistance: 0, finalizationStatus: "saving" },
+                error: null,
+            };
+        case "COMPLETION_FAILED":
+            if (!state.ride || state.ride.request.id !== action.rideId) return state;
+            return {
+                ...state,
+                ride: { ...state.ride, progress: 1, remainingDistance: 0, finalizationStatus: "error", finalizationError: action.error },
+                error: action.error,
             };
         case "CANCEL_RIDE":
             if (!state.ride) return state;
@@ -140,6 +159,7 @@ export default function useWorkSession() {
     const requestNumberRef = useRef(0);
     const activeRideRef = useRef(null);
     const hasRideRef = useRef(false);
+    const finalizingRideIdRef = useRef(null);
     const isOnline = state.status !== "offline";
     const hasRide = Boolean(state.ride);
     const hasSummary = Boolean(state.summary);
@@ -212,6 +232,67 @@ export default function useWorkSession() {
             setBusy(false);
         }
     }
+
+    const finalizeRide = useCallback(async (ride = activeRideRef.current) => {
+        if (!ride || ride.phase !== "inProgress" || finalizingRideIdRef.current === ride.request.id) return;
+        if (!userUid) {
+            dispatch({
+                type: "COMPLETION_FAILED",
+                rideId: ride.request.id,
+                error: t("work.errors.driverNotAuthenticated"),
+            });
+            return;
+        }
+
+        finalizingRideIdRef.current = ride.request.id;
+        dispatch({ type: "FINALIZING", rideId: ride.request.id });
+
+        try {
+            const request = ride.request;
+            // Preserve retries for requests created before the minimum-distance fix.
+            const distanceKm = Number.isFinite(request.tripDistance) ? Math.max(1, request.tripDistance) : 1;
+            const durationMin = request.estimatedDuration;
+            const { fare, commission, driverEarnings } = calculateFare({
+                distanceKm,
+                durationMin,
+                category: request.category,
+                tip: request.tip || 0,
+            });
+            const trip = {
+                id: request.id,
+                driverId: userUid,
+                passenger: { name: request.passengerName, rating: request.passengerRating },
+                passengerName: request.passengerName,
+                status: "completed",
+                category: request.category,
+                pickup: { ...request.pickupLocation, address: "" },
+                destination: { ...request.destination, address: "" },
+                distanceKm,
+                durationMin,
+                fare,
+                commission,
+                commissionRate: PRICING.commissionRate,
+                tip: request.tip || 0,
+                driverEarnings,
+                paymentMethod: request.paymentMethod,
+                paymentStatus: request.paymentMethod === "cash" ? "cash_collected" : "pending",
+                payoutStatus: request.paymentMethod === "electronic" ? "pending" : "not_applicable",
+                commissionStatus: request.paymentMethod === "cash" ? "pending" : "withheld",
+                passengerRating: request.passengerRating,
+                route: ride.route || [request.pickupLocation, request.destination],
+                createdAt: request.createdAt,
+                acceptedAt: ride.acceptedAt,
+                completedAt: Date.now(),
+            };
+            const savedTrip = await saveCompletedTrip(userUid, trip);
+            dispatch({ type: "COMPLETE", rideId: request.id, trip: savedTrip || trip });
+        } catch (error) {
+            finalizingRideIdRef.current = null;
+            const code = error?.code?.split("/").pop();
+            const errorKey = code === "permission-denied" ? "tripRules" : "tripSave";
+            dispatch({ type: "COMPLETION_FAILED", rideId: ride.request.id, error: t(`work.errors.${errorKey}`) });
+        }
+    }, [t, userUid]);
 
     useEffect(() => {
         if (!isOnline) return undefined;
@@ -287,28 +368,35 @@ export default function useWorkSession() {
         const interval = setInterval(() => {
             const progress = Math.min(1, (Date.now() - ride.startedAt) / duration);
             const location = interpolateRoute(ride.route, progress) || interpolatePoint(from, to, progress);
+            if (progress === 1) {
+                clearInterval(interval);
+                if (phase === "toPickup") {
+                    dispatch({ type: "ARRIVE_PICKUP" });
+                } else {
+                    finalizeRide(ride);
+                }
+                return;
+            }
             dispatch({
-                type: progress === 1 ? (phase === "toPickup" ? "ARRIVE_PICKUP" : "COMPLETE") : "PROGRESS",
+                type: "PROGRESS",
                 phase,
                 location,
                 progress,
                 remainingDistance: (phase === "toPickup" ? ride.request.pickupDistance : ride.request.tripDistance) * (1 - progress),
             });
-            if (progress === 1) clearInterval(interval);
-        }, 250);
+        }, 100);
         return () => clearInterval(interval);
-    }, [ridePhase, rideStartedAt, rideRouteReady]);
+    }, [ridePhase, rideStartedAt, rideRouteReady, finalizeRide]);
 
     useEffect(() => {
         if (!state.summary) return undefined;
-        saveCompletedRide(state.summary).catch(() => {});
         const timeout = setTimeout(() => dispatch({ type: "CLOSE_SUMMARY" }), 7000);
         return () => clearTimeout(timeout);
     }, [state.summary]);
 
     function skipSimulation() {
         if (state.ride?.phase === "toPickup") dispatch({ type: "ARRIVE_PICKUP" });
-        else if (state.ride?.phase === "inProgress") dispatch({ type: "COMPLETE" });
+        else if (state.ride?.phase === "inProgress") finalizeRide(state.ride);
     }
 
     function cancelRide() {
@@ -333,5 +421,6 @@ export default function useWorkSession() {
         skipSimulation,
         cancelRide,
         closeSummary: () => dispatch({ type: "CLOSE_SUMMARY" }),
+        retryFinalize: () => finalizeRide(state.ride),
     };
 }

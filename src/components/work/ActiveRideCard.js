@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ActiveRideCard({ ride, colors, typography, t, onBoard, onSkip, onCancel }) {
+export default function ActiveRideCard({ ride, colors, typography, t, onBoard, onSkip, onCancel, onRetry }) {
     const arrived = ride.phase === "arrived";
     const enRouteToPickup = ride.phase === "toPickup";
     const title = arrived
@@ -21,14 +21,23 @@ export default function ActiveRideCard({ ride, colors, typography, t, onBoard, o
                     <Text style={[styles.title, { color: colors.text, fontFamily: typography.bold }]}>{title}</Text>
                     <Text style={[styles.caption, { color: colors.secondaryText }]}>{ride.request.passengerName} · {destination}</Text>
                 </View>
-                <Text style={[styles.earnings, { color: colors.text, fontFamily: typography.bold }]}>{t("work.earnings", { amount: ride.request.estimatedEarnings.toLocaleString() })}</Text>
+                <Text style={[styles.earnings, { color: colors.text, fontFamily: typography.bold }]}>{t("work.earnings", { amount: ride.request.fare.toLocaleString("es-CO") })}</Text>
             </View>
             {ride.phase === "inProgress" && (
                 <View style={[styles.progressTrack, { backgroundColor: colors.surface }]}>
                     <View style={[styles.progress, { width: `${Math.max(5, Math.round(ride.progress * 100))}%`, backgroundColor: colors.primary }]} />
                 </View>
             )}
-            {arrived ? (
+            {ride.finalizationStatus === "saving" ? <Text style={[styles.status, { color: colors.secondaryText }]}>{t("work.savingTrip")}</Text> : null}
+            {ride.finalizationStatus === "error" ? (
+                <View style={styles.errorActions}>
+                    <Text style={[styles.error, { color: colors.danger || "#B42332" }]}>{ride.finalizationError}</Text>
+                    <Pressable onPress={onRetry} style={[styles.retry, { backgroundColor: colors.primary }]} accessibilityRole="button">
+                        <Text style={[styles.primaryText, { fontFamily: typography.bold }]}>{t("work.retrySave")}</Text>
+                    </Pressable>
+                </View>
+            ) : null}
+            {ride.finalizationStatus === "saving" || ride.finalizationStatus === "error" ? null : arrived ? (
                 <Pressable onPress={onBoard} style={[styles.primaryButton, { backgroundColor: colors.primary }]} accessibilityRole="button">
                     <Text style={[styles.primaryText, { fontFamily: typography.bold }]}>{t("work.passengerOnboard")}</Text>
                 </Pressable>
@@ -68,4 +77,8 @@ const styles = StyleSheet.create({
     cancelText: { fontSize: 11 },
     primaryButton: { height: 46, borderRadius: 14, marginTop: 15, alignItems: "center", justifyContent: "center" },
     primaryText: { color: "#FFFFFF", fontSize: 14 },
+    status: { marginTop: 13, fontSize: 12 },
+    errorActions: { marginTop: 12, gap: 8 },
+    error: { fontSize: 12 },
+    retry: { alignSelf: "flex-start", paddingHorizontal: 15, height: 39, borderRadius: 12, justifyContent: "center" },
 });

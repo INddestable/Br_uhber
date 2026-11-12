@@ -61,6 +61,7 @@ export default function WorkScreen() {
                         onBoard={session.markPassengerOnboard}
                         onSkip={session.skipSimulation}
                         onCancel={session.cancelRide}
+                        onRetry={session.retryFinalize}
                     />
                 ) : null}
                 {state.summary ? (
