@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /drivers/{uid} {
+      function canUpdateProfile() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 "personalData",
+                 "vehicle",
+                 "documents"
+               ])
+               && request.resource.data.personalData
+                    .diff(resource.data.personalData)
+                    .affectedKeys().hasOnly([
+                      "fullName",
+                      "documentNumber",
+                      "phone",
+                      "birthDate",
+                      "gender",
+                      "language",
+                      "profilePhoto"
+                    ])
+               && request.resource.data.vehicle
+                    .diff(resource.data.vehicle)
+                    .affectedKeys().hasOnly([
+                      "vehicleBrand",
+                      "vehicleCapacity",
+                      "vehicleCategory",
+                      "vehicleColor",
+                      "vehicleModel",
+                      "vehiclePhoto",
+                      "vehiclePlate",
+                      "vehicleYear"
+                    ])
+               && request.resource.data.documents
+                    .diff(resource.data.documents)
+                    .affectedKeys().hasOnly([
+                      "licenseExpiration",
+                      "licenseNumber",
+                      "licensePhoto",
+                      "paymentEmail",
+                      "soatExpiration",
+                      "soatPhoto",
+                      "technicalReviewPhoto",
+                      "technicalReviewExpiration"
+                    ]);
+      }
+
+      function canUpdateAvailability() {
+        let changed = request.resource.data.diff(resource.data).affectedKeys();
+        return resource.data.approvalStatus == "approved"
+               && request.resource.data.approvalStatus == resource.data.approvalStatus
+               && changed.hasOnly([
+                    "availabilityStatus",
+                    "lastLocation",
+                    "lastLocationUpdatedAt"
+                  ])
+               && changed.hasAny(["availabilityStatus", "lastLocation"])
+               && request.resource.data.availabilityStatus
+                    in ["available", "unavailable"]
+               && (
+                    !changed.hasAny(["lastLocation", "lastLocationUpdatedAt"])
+                    || (
+                      changed.hasAll(["lastLocation", "lastLocationUpdatedAt"])
+                      && request.resource.data.lastLocation is map
+                      && request.resource.data.lastLocation.keys().hasAll([
+                           "latitude",
+                           "longitude"
+                         ])
+                      && request.resource.data.lastLocation.keys().hasOnly([
+                           "latitude",
+                           "longitude"
+                         ])
+                      && request.resource.data.lastLocation.latitude is number
+                      && request.resource.data.lastLocation.latitude >= -90
+                      && request.resource.data.lastLocation.latitude <= 90
+                      && request.resource.data.lastLocation.longitude is number
+                      && request.resource.data.lastLocation.longitude >= -180
+                      && request.resource.data.lastLocation.longitude <= 180
+                      && request.resource.data.lastLocationUpdatedAt == request.time
+                    )
+                  );
+      }
+
+      allow get: if request.auth != null
+                 && request.auth.uid == uid;
+
+      allow list: if false;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.keys().hasAll([
+                      "personalData",
+                      "vehicle",
+                      "documents",
+                      "approvalStatus",
+                      "availabilityStatus",
+                      "createdAt"
+                    ])
+                    && request.resource.data.keys().hasOnly([
+                      "personalData",
+                      "vehicle",
+                      "documents",
+                      "approvalStatus",
+                      "availabilityStatus",
+                      "createdAt"
+                    ])
+                    && request.resource.data.approvalStatus == "pending"
+                    && request.resource.data.availabilityStatus == "unavailable"
+                    && request.resource.data.createdAt == request.time;
+
+      // Drivers can edit their profile, or approved drivers can update only
+      // their availability and a validated location with a server timestamp.
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && (canUpdateProfile() || canUpdateAvailability());
+
+      allow delete: if false;
+    }
+  }
+}
