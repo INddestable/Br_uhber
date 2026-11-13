@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,9 @@ import { useAuth } from "../../../context/AuthContext";
 import { useTheme } from "../../../context/ThemeContext";
 import { calculatePendingBalance, calculatePeriodSummary, filterTripsByPaymentMethod, filterTripsByPeriod } from "../../../services/earningsService";
 import { subscribeToDriverTrips } from "../../../services/tripService";
+import { refreshMercadoPagoData, requestMercadoPagoPayout, startMercadoPagoLink, subscribeToMercadoPagoData, syncMercadoPagoPayouts } from "../../../services/mercadoPagoService";
 import WorkMap from "../../../components/work/WorkMap";
+import PayoutCard from "../../../components/earnings/PayoutCard";
 
 const money = (amount) => `$${(Number.isFinite(amount) ? amount : 0).toLocaleString("es-CO")} COP`;
 const timestampDate = (value) => new Date(Number.isFinite(value) ? value : 0);
@@ -118,6 +120,11 @@ export default function EarningsScreen() {
     const [activeDateField, setActiveDateField] = useState(null);
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [now, setNow] = useState(() => new Date());
+    const [payoutProfile, setPayoutProfile] = useState({ uid: null, account: null, withdrawals: [] });
+    const [payoutBusy, setPayoutBusy] = useState(false);
+    const [payoutError, setPayoutError] = useState(null);
+    const hasProcessingPayout = payoutProfile.uid === user?.uid
+        && payoutProfile.withdrawals.some((withdrawal) => withdrawal.status === "processing");
 
     useEffect(() => {
         if (!user?.uid) return undefined;
@@ -133,13 +140,70 @@ export default function EarningsScreen() {
         });
     }, [user?.uid]);
 
+    useEffect(() => {
+        if (!user?.uid) return undefined;
+        return subscribeToMercadoPagoData(user.uid, (data) => {
+            setPayoutProfile({ uid: user.uid, ...data });
+            setPayoutError(null);
+        }, () => setPayoutError(t("earnings.payout.loadError")));
+    }, [user?.uid, t]);
+
+    useEffect(() => {
+        if (!user?.uid) return undefined;
+        const sync = async () => {
+            try {
+                await syncMercadoPagoPayouts();
+                const data = await refreshMercadoPagoData();
+                setPayoutProfile({ uid: user.uid, ...data });
+            } catch { /* Keep the last known withdrawal status if the service is temporarily offline. */ }
+        };
+        void sync();
+        if (!hasProcessingPayout) return undefined;
+        const timer = setInterval(sync, 45_000);
+        return () => clearInterval(timer);
+    }, [user?.uid, hasProcessingPayout]);
+
     const loading = Boolean(user?.uid && loadedForUid !== user.uid);
+    const payoutData = payoutProfile.uid === user?.uid ? payoutProfile : { account: null, withdrawals: [] };
     const currentTrips = useMemo(() => trips.filter((trip) => trip.driverId === user?.uid), [trips, user?.uid]);
     const periodTrips = useMemo(() => filterTripsByPeriod(currentTrips, period, now, customRange), [currentTrips, period, now, customRange]);
     const summary = useMemo(() => calculatePeriodSummary(periodTrips), [periodTrips]);
-    const pendingBalance = useMemo(() => calculatePendingBalance(currentTrips), [currentTrips]);
+    const tripBalance = useMemo(() => calculatePendingBalance(currentTrips), [currentTrips]);
+    const alreadyWithdrawn = useMemo(() => payoutData.withdrawals
+        .filter((withdrawal) => ["processing", "approved", "review_required", "paid"].includes(withdrawal.status))
+        .reduce((sum, withdrawal) => sum + withdrawal.amount, 0), [payoutData.withdrawals]);
+    const pendingBalance = tripBalance - alreadyWithdrawn;
+    const availableBalance = Math.max(0, pendingBalance);
     const historyTrips = useMemo(() => filterTripsByPeriod(currentTrips, historyPeriod, now, historyRange), [currentTrips, historyPeriod, now, historyRange]);
     const visibleTrips = useMemo(() => filterTripsByPaymentMethod(historyTrips, paymentMethod), [historyTrips, paymentMethod]);
+
+    async function linkMercadoPagoAccount() {
+        if (!user?.uid) throw new Error("PAYOUT_DRIVER_REQUIRED");
+        setPayoutBusy(true);
+        try {
+            const authorizationUrl = await startMercadoPagoLink();
+            await Linking.openURL(authorizationUrl);
+            setPayoutError(null);
+        } finally {
+            setPayoutBusy(false);
+        }
+    }
+
+    async function withdrawMercadoPagoBalance(amount) {
+        if (!user?.uid) throw new Error("PAYOUT_DRIVER_REQUIRED");
+        setPayoutBusy(true);
+        try {
+            await requestMercadoPagoPayout(amount);
+            const updated = await refreshMercadoPagoData();
+            setPayoutProfile({ uid: user.uid, ...updated });
+            setPayoutError(null);
+        } catch (withdrawError) {
+            setPayoutError(t("earnings.payout.withdrawError"));
+            throw withdrawError;
+        } finally {
+            setPayoutBusy(false);
+        }
+    }
 
     function openDatePicker(field, scope = "summary") {
         setActiveDateField(`${scope}:${field}`);
@@ -176,6 +240,18 @@ export default function EarningsScreen() {
                             <Text style={[styles.balanceValue, { fontFamily: typography.bold }]}>{money(pendingBalance)}</Text>
                             <Text style={styles.balanceNote}>{t("earnings.balanceDisclaimer")}</Text>
                         </View>
+                        <PayoutCard
+                            account={payoutData.account}
+                            withdrawals={payoutData.withdrawals}
+                            availableBalance={availableBalance}
+                            busy={payoutBusy}
+                            error={payoutError}
+                            onLink={linkMercadoPagoAccount}
+                            onWithdraw={withdrawMercadoPagoBalance}
+                            colors={colors}
+                            typography={typography}
+                            t={t}
+                        />
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
                             {["today", "week", "month"].map((value) => <FilterChip key={value} label={t(`earnings.period.${value}`)} selected={period === value} onPress={() => setPeriod(value)} colors={colors} typography={typography} />)}
                             <FilterChip label={t("earnings.period.custom")} selected={period === "custom"} onPress={() => setPeriod("custom")} colors={colors} typography={typography} />
