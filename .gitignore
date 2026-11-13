@@ -42,3 +42,4 @@ payout-api/.wrangler/
 /ios
 /android
 firestore.rules
+firestore.trips.rules
