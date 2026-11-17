@@ -8,6 +8,28 @@ import { createRideRequest, getDrivingRoute, interpolatePoint, interpolateRoute 
 import { calculateFare, PRICING } from "../config/pricing";
 import { saveCompletedTrip } from "../services/tripService";
 
+function createRide(state, request) {
+    const acceptedAt = request.acceptedAt || Date.now();
+    return {
+        ...state,
+        status: "searching",
+        request: null,
+        requestExpiresAt: null,
+        error: null,
+        ride: {
+            request,
+            phase: "toPickup",
+            start: state.location,
+            progress: 0,
+            remainingDistance: request.pickupDistance,
+            startedAt: Date.now(),
+            acceptedAt,
+            route: [state.location, request.pickupLocation],
+            routeReady: false,
+        },
+    };
+}
+
 const initialState = {
     status: "offline",
     location: null,
@@ -47,23 +69,25 @@ function reducer(state, action) {
             return { ...state, status: "searching", request: null, requestExpiresAt: null };
         case "ACCEPT":
             if (!state.request || !state.location) return state;
-            return {
-                ...state,
-                status: "searching",
-                request: null,
-                requestExpiresAt: null,
-                ride: {
-                    request: state.request,
-                    phase: "toPickup",
-                    start: state.location,
-                    progress: 0,
-                    remainingDistance: state.request.pickupDistance,
-                    startedAt: Date.now(),
-                    acceptedAt: Date.now(),
-                    route: [state.location, state.request.pickupLocation],
-                    routeReady: false,
-                },
-            };
+            if (state.request.paymentMethod === "electronic") {
+                return {
+                    ...state,
+                    status: "payment",
+                    request: { ...state.request, acceptedAt: Date.now(), paymentStatus: "pending" },
+                    requestExpiresAt: null,
+                    error: null,
+                };
+            }
+            return createRide(state, { ...state.request, acceptedAt: Date.now() });
+        case "PAYMENT_APPROVED":
+            if (state.status !== "payment" || state.request?.id !== action.tripId) return state;
+            return createRide(state, { ...state.request, paymentStatus: "paid" });
+        case "PAYMENT_ERROR":
+            if (state.status !== "payment" || state.request?.id !== action.tripId) return state;
+            return { ...state, error: action.error };
+        case "CANCEL_PAYMENT":
+            if (state.status !== "payment") return state;
+            return { ...state, status: "searching", request: null, requestExpiresAt: null, error: null };
         case "PROGRESS":
             if (!state.ride || state.ride.phase !== action.phase) return state;
             return {
@@ -155,6 +179,7 @@ export default function useWorkSession() {
     const [locating, setLocating] = useState(false);
     const [secondsLeft, setSecondsLeft] = useState(25);
     const driverLocationRef = useRef(null);
+    const lastGpsLocationRef = useRef({ location: null, timestamp: 0 });
     const lastLocationSyncRef = useRef({ location: null, time: 0 });
     const requestNumberRef = useRef(0);
     const activeRideRef = useRef(null);
@@ -163,6 +188,7 @@ export default function useWorkSession() {
     const isOnline = state.status !== "offline";
     const hasRide = Boolean(state.ride);
     const hasSummary = Boolean(state.summary);
+    const isWaitingForPayment = state.status === "payment";
     const userUid = user?.uid;
     const ridePhase = state.ride?.phase;
     const rideStartedAt = state.ride?.startedAt;
@@ -186,6 +212,7 @@ export default function useWorkSession() {
         setLocating(true);
         try {
             const location = await getCurrentDriverLocation({ forceFresh: true });
+            lastGpsLocationRef.current = { location, timestamp: Date.now() };
             driverLocationRef.current = location;
             dispatch({ type: "LOCATION", location });
             return location;
@@ -198,7 +225,7 @@ export default function useWorkSession() {
     }
 
     async function toggleAvailability() {
-        if (busy || hasRide) return;
+        if (busy || hasRide || isWaitingForPayment) return;
         setBusy(true);
         if (isOnline) {
             dispatch({ type: "DISCONNECT" });
@@ -214,7 +241,12 @@ export default function useWorkSession() {
 
         try {
             if (!userUid) throw new Error("DRIVER_NOT_AUTHENTICATED");
-            const location = await getCurrentDriverLocation();
+            const previousGpsLocation = lastGpsLocationRef.current;
+            const location = await getCurrentDriverLocation({
+                fallbackLocation: previousGpsLocation.location,
+                fallbackTimestamp: previousGpsLocation.timestamp,
+            });
+            lastGpsLocationRef.current = { location, timestamp: Date.now() };
             await setDriverAvailability(userUid, true, location);
             lastLocationSyncRef.current = { location, time: Date.now() };
             dispatch({ type: "CONNECT", location });
@@ -276,8 +308,8 @@ export default function useWorkSession() {
                 driverEarnings,
                 paymentMethod: request.paymentMethod,
                 paymentStatus: request.paymentMethod === "cash" ? "cash_collected" : "pending",
-                payoutStatus: request.paymentMethod === "electronic" ? "pending" : "not_applicable",
-                commissionStatus: request.paymentMethod === "cash" ? "pending" : "withheld",
+                payoutStatus: "not_applicable",
+                commissionStatus: "pending",
                 passengerRating: request.passengerRating,
                 route: ride.route || [request.pickupLocation, request.destination],
                 createdAt: request.createdAt,
@@ -285,7 +317,14 @@ export default function useWorkSession() {
                 completedAt: Date.now(),
             };
             const savedTrip = await saveCompletedTrip(userUid, trip);
-            dispatch({ type: "COMPLETE", rideId: request.id, trip: savedTrip || trip });
+            dispatch({
+                type: "COMPLETE",
+                rideId: request.id,
+                trip: {
+                    ...(savedTrip || trip),
+                    paymentStatus: request.paymentMethod === "electronic" ? "paid" : "cash_collected",
+                },
+            });
         } catch (error) {
             finalizingRideIdRef.current = null;
             const code = error?.code?.split("/").pop();
@@ -299,6 +338,7 @@ export default function useWorkSession() {
         let cancelled = false;
         let subscription;
         watchDriverLocation((location) => {
+            lastGpsLocationRef.current = { location, timestamp: Date.now() };
             driverLocationRef.current = location;
             if (!hasRideRef.current) dispatch({ type: "LOCATION", location });
             const lastSync = lastLocationSyncRef.current;
@@ -388,12 +428,6 @@ export default function useWorkSession() {
         return () => clearInterval(interval);
     }, [ridePhase, rideStartedAt, rideRouteReady, finalizeRide]);
 
-    useEffect(() => {
-        if (!state.summary) return undefined;
-        const timeout = setTimeout(() => dispatch({ type: "CLOSE_SUMMARY" }), 7000);
-        return () => clearTimeout(timeout);
-    }, [state.summary]);
-
     function skipSimulation() {
         if (state.ride?.phase === "toPickup") dispatch({ type: "ARRIVE_PICKUP" });
         else if (state.ride?.phase === "inProgress") finalizeRide(state.ride);
@@ -413,9 +447,13 @@ export default function useWorkSession() {
         secondsLeft,
         isOnline,
         isOnTrip: hasRide,
+        isWaitingForPayment,
         toggleAvailability,
         locateDriver,
         acceptRequest: () => dispatch({ type: "ACCEPT" }),
+        confirmElectronicPayment: (tripId) => dispatch({ type: "PAYMENT_APPROVED", tripId }),
+        paymentError: (tripId, error) => dispatch({ type: "PAYMENT_ERROR", tripId, error }),
+        cancelElectronicPayment: () => dispatch({ type: "CANCEL_PAYMENT" }),
         rejectRequest: () => dispatch({ type: "REJECT" }),
         markPassengerOnboard: () => dispatch({ type: "BOARD" }),
         skipSimulation,

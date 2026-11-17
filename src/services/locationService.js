@@ -2,6 +2,16 @@ import * as Location from "expo-location";
 const LOCATION_TIMEOUT_MS = 25000;
 const LAST_KNOWN_MAX_AGE_MS = 10 * 60 * 1000;
 const MAX_LAST_KNOWN_ACCURACY_METERS = 250;
+const RECENT_GPS_FALLBACK_MAX_AGE_MS = 2 * 60 * 1000;
+
+function isValidLocation(location) {
+    return Number.isFinite(location?.latitude)
+        && location.latitude >= -90
+        && location.latitude <= 90
+        && Number.isFinite(location?.longitude)
+        && location.longitude >= -180
+        && location.longitude <= 180;
+}
 
 function withTimeout(promise, timeoutMs = LOCATION_TIMEOUT_MS) {
     return new Promise((resolve, reject) => {
@@ -16,7 +26,7 @@ function withTimeout(promise, timeoutMs = LOCATION_TIMEOUT_MS) {
     });
 }
 
-export async function getCurrentDriverLocation({ forceFresh = false } = {}) {
+export async function getCurrentDriverLocation({ forceFresh = false, fallbackLocation = null, fallbackTimestamp = 0 } = {}) {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (permission.status !== "granted") {
         throw new Error("LOCATION_PERMISSION_DENIED");
@@ -24,6 +34,11 @@ export async function getCurrentDriverLocation({ forceFresh = false } = {}) {
 
     const enabled = await Location.hasServicesEnabledAsync();
     if (!enabled) throw new Error("LOCATION_SERVICES_DISABLED");
+
+    const hasRecentFallback = !forceFresh
+        && isValidLocation(fallbackLocation)
+        && Date.now() - fallbackTimestamp <= RECENT_GPS_FALLBACK_MAX_AGE_MS;
+    if (hasRecentFallback && Date.now() - fallbackTimestamp <= 30000) return fallbackLocation;
 
     const lastKnown = forceFresh ? null : await Location.getLastKnownPositionAsync().catch(() => null);
     const isUsableLastKnown = lastKnown
@@ -53,13 +68,16 @@ export async function getCurrentDriverLocation({ forceFresh = false } = {}) {
         // When the fresh GPS fix times out, a recent accurate device fix still
         // represents the driver's location. Permissions and GPS services were
         // checked above, and this fallback is never used for forced recentering.
-        if (!isUsableLastKnown || forceFresh) {
-            throw new Error("LOCATION_TIMEOUT");
+        if (!forceFresh && hasRecentFallback) {
+            return fallbackLocation;
         }
-        return {
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude,
-        };
+        if (isUsableLastKnown && !forceFresh) {
+            return {
+                latitude: lastKnown.coords.latitude,
+                longitude: lastKnown.coords.longitude,
+            };
+        }
+        throw new Error("LOCATION_TIMEOUT");
     } finally {
         firstWatch.cancel();
     }

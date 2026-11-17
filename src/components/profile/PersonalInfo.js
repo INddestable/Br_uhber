@@ -175,29 +175,9 @@ export default function PersonalInfo({ driver, onSaved }) {
 
     const footer = (
         <View
-            style={[
-                styles.paymentCard,
-                { backgroundColor: colors.surface },
-            ]}
+
         >
-            <Text style={[styles.paymentTitle, { color: colors.text }]}>
-                {t("profile.personal.mercadoPago.title")}
-            </Text>
-
-            <Text style={{ color: colors.secondaryText }}>
-                {t("profile.personal.mercadoPago.description")}
-            </Text>
-
-            <View
-                style={[
-                    styles.status,
-                    { backgroundColor: colors.background },
-                ]}
-            >
-                <Text style={{ color: colors.secondaryText }}>
-                    {t("profile.personal.mercadoPago.status")}
-                </Text>
-            </View>
+            
         </View>
     );
 

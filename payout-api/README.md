@@ -1,54 +1,56 @@
-# Bruhber payout API (Cloudflare Free)
+# API local de pagos de Bruhber
 
-This Worker hosts only Mercado Pago OAuth and sandbox payouts. Firebase remains the source for authentication and completed trips. OAuth states, the verified Mercado Pago destination, and payout records are stored in Cloudflare D1 so Firebase can stay on Spark. The Worker validates Firebase ID tokens with Firebase Auth and reads the driver's trips through Firestore's REST API under the driver's existing Firestore rules.
+Este API Node.js conecta la app con Firebase Authentication, Firestore y Mercado Pago Checkout Pro. Se ejecuta en el computador de desarrollo y ngrok publica temporalmente el puerto local 8080. No requiere Cloud Functions ni el plan Blaze de Firebase.
 
-Never put Mercado Pago secrets in the mobile app, `.env.local`, or `wrangler.toml`. Set them with `wrangler secret put`.
+## Configuración inicial
 
-## First-time setup
+1. Instala Node.js si todavía no está instalado. No hace falta instalar paquetes para este API: usa módulos incluidos en Node.
+2. En `payout-api/.env.local`, configura `PORT=8080`, la URL HTTPS actual que muestra ngrok, el ID de proyecto Firebase, la API key web pública de Firebase, el Access Token de prueba del vendedor y el ID esperado de ese vendedor. Usa `payout-api/.env.example` como referencia. No pegues secretos en comandos ni en archivos versionados.
+3. En la raíz del proyecto, configura `.env.local` con `EXPO_PUBLIC_PAYOUT_API_URL` igual a esa misma URL HTTPS de ngrok. La app solo necesita la dirección pública; nunca recibe el Access Token.
+4. Deja ngrok ejecutándose y confirma que el túnel reenvía `https://<dominio-ngrok>` a `http://localhost:8080`.
+5. Desde la raíz del repositorio, inicia el API:
 
-1. Create a free Cloudflare account and enable a `workers.dev` subdomain in **Workers & Pages**. The Worker will use that public URL; no custom domain is needed.
-2. In PowerShell, open this folder:
+   ```powershell
+   npm --prefix payout-api run local
+   ```
 
-   `cd "C:\Users\kevin\Desktop\Yo\ING DE SOFTWARE TDEA\SEMESTRE 5\Desarrollo Movil\Bruhber\payout-api"`
+6. Comprueba `https://<dominio-ngrok>/health`; debe responder `{"ok":true,...}`. Reinicia Expo después de cambiar su `.env.local`:
 
-3. Sign Wrangler into Cloudflare:
+   ```powershell
+   npx expo start -c
+   ```
 
-   `npx wrangler login`
+Los archivos `.env.local` y los datos locales de pagos están ignorados por Git. El archivo `payout-api/.local-data/payments.json` guarda temporalmente la relación entre cada viaje y su preferencia/estado de pago. Conserva ese archivo mientras pruebes el flujo: al borrar el archivo, la app ya no podrá relacionar los pagos anteriores.
 
-4. Create the D1 database and copy the returned database ID into `wrangler.toml`, replacing `REPLACE_WITH_D1_DATABASE_ID`:
+## Probar un pago
 
-   `npx wrangler d1 create bruhber-payouts`
+1. Inicia sesión en Bruhber con un conductor aprobado y conéctalo.
+2. Acepta una solicitud simulada de pago electrónico. La app solicita al API crear una preferencia y abre Checkout Pro en el navegador seguro del sistema antes de comenzar la ruta.
+3. En el checkout, usa una cuenta compradora de prueba separada y el medio de pago de prueba aprobado por Mercado Pago. No uses una cuenta ni una tarjeta real.
+4. Mercado Pago vuelve a Bruhber con un deep link (`bruhber://checkout/return` en una build instalada; Expo Go genera el suyo durante desarrollo). La app consulta el estado directamente al API. La ruta solo empieza cuando el API encuentra un pago aprobado con el monto, moneda y vendedor esperados. Si se cancela o rechaza, el viaje no empieza.
+5. Los pagos en efectivo siguen el flujo existente sin pasar por este checkout.
 
-5. In `wrangler.toml`, replace `REPLACE_WITH_PUBLIC_FIREBASE_API_KEY` with the Firebase `apiKey` from `../src/config/firebase.js`. This Firebase web API key is public application configuration, not a Mercado Pago secret.
-6. Create the D1 tables:
+En esta modalidad el Access Token del vendedor está configurado una vez en el API local. Por eso los pagos electrónicos se acreditan a esa cuenta vendedora de prueba; aún no se hace OAuth ni se enlaza una cuenta distinta por cada conductor. La tarjeta de Ganancias verifica qué vendedor está configurado.
 
-   `npx wrangler d1 migrations apply bruhber-payouts --remote`
+## Cómo funciona sin Blaze
 
-7. Deploy once to obtain the Worker URL:
+- Firebase Authentication valida el ID token del conductor mediante la API pública de Firebase.
+- Firestore valida el acceso del propio conductor a su documento; el API solo acepta perfiles aprobados.
+- El API crea una preferencia de Checkout Pro con el Access Token que solo existe en el entorno local.
+- El estado del pago se confirma consultando a Mercado Pago. La vuelta del navegador o una notificación por sí solas no se consideran una aprobación.
+- Los estados de Checkout Pro se guardan en un JSON local. El viaje completado continúa guardándose en Firestore con las reglas actuales y la pantalla de Ganancias combina ambos registros por ID de viaje.
 
-   `npx wrangler deploy`
+Este montaje es para desarrollo y pruebas mientras ngrok y el computador estén encendidos. El archivo local no es almacenamiento compartido ni una base de datos de producción; para operación persistente se necesitará un backend/almacenamiento desplegado y confiable.
 
-8. Set the OAuth callback in `wrangler.toml` to the URL printed by Wrangler plus `/oauth/mercadopago/callback`. This project's deployed callback is:
+## Rutas del API
 
-   `MP_REDIRECT_URI = "https://bruhber-payout-api.kevinkarv77708.workers.dev/oauth/mercadopago/callback"`
+- `GET /health`: disponibilidad del servidor.
+- `POST /v1/checkout`: crea la preferencia de prueba para un viaje.
+- `GET /v1/payments/status?tripId=...`: verifica el estado del pago consultando Mercado Pago.
+- `GET /v1/payments`: lista los estados locales del conductor autenticado.
+- `GET /v1/me` y `POST /v1/mercadopago/link`: devuelven la cuenta vendedora de prueba configurada.
+- `POST /v1/mercadopago/webhook`: recibe avisos y vuelve a consultar la API de Mercado Pago antes de cambiar el estado local.
 
-9. From Mercado Pago Developers, use the app's Client ID and Client Secret, plus the Payouts test Access Token. Set each through the interactive prompts (do not put values after the command):
+El Cloudflare Worker anterior se conserva en `src/` y `wrangler.toml` como referencia, pero la app usa el endpoint de ngrok definido en su `.env.local`.
 
-   `npx wrangler secret put MP_CLIENT_ID`
-
-   `npx wrangler secret put MP_CLIENT_SECRET`
-
-   `npx wrangler secret put MP_PAYOUTS_ACCESS_TOKEN`
-
-10. In the Mercado Pago application's redirect URL list, register the exact callback URL from step 8 and enable OAuth PKCE S256. The OAuth exchange requests a sandbox seller token with `test_token: true`.
-11. Deploy again so the callback URL change is active:
-
-   `npx wrangler deploy`
-
-12. In the project root, `.env.local` is configured to use `https://bruhber-payout-api.kevinkarv77708.workers.dev`. Restart Expo with `npx expo start -c`.
-
-## Test flow
-
-In the app, link a Colombian Mercado Pago seller test account using the Mercado Pago consent page. Payouts use the test Access Token as the source credential and the linked seller's verified email as recipient. The simulated trip balance is checked against the driver's own completed Firestore trips. Mercado Pago's asynchronous status is synchronized before the app labels a withdrawal as accredited.
-
-The Free plan has quotas, including 100,000 Worker requests/day and D1 daily row limits. If a quota is exceeded, requests can fail until the quota resets. Review Cloudflare's current [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) before relying on the service.
+La propiedad `scheme: "bruhber"` de `app.json` registra el deep link en builds nativas. Expo Go usa su URL `exp://` de desarrollo y no requiere reconstruir la app. Si pruebas con una build de desarrollo propia después de cambiar el esquema, vuelve a compilarla para que el sistema operativo registre `bruhber://`.

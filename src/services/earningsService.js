@@ -62,8 +62,12 @@ export function calculatePeriodSummary(trips) {
 
 export function calculatePendingBalance(trips) {
     return trips.reduce((balance, trip) => {
-        if (trip.paymentMethod === "electronic" && trip.payoutStatus !== "paid") {
+        // Compatibility for trips created by the former platform-payout flow.
+        if (trip.paymentMethod === "electronic" && !trip.paymentId && trip.payoutStatus === "pending" && trip.commissionStatus === "withheld") {
             return balance + (trip.driverEarnings || 0);
+        }
+        if (trip.paymentMethod === "electronic" && trip.paymentStatus === "paid" && trip.commissionStatus !== "paid") {
+            return balance - (trip.commission || 0);
         }
         if (trip.paymentMethod === "cash" && trip.commissionStatus !== "paid") {
             return balance - (trip.commission || 0);

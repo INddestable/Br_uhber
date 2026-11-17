@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function WorkHeader({ online, busy, loading, colors, typography, t, onToggle }) {
-    const status = busy ? t("work.tripInProgress") : online ? t("work.searching") : t("work.disconnected");
+export default function WorkHeader({ online, busy, paymentPending, loading, colors, typography, t, onToggle }) {
+    const status = paymentPending ? t("work.waitingForPayment") : busy ? t("work.tripInProgress") : online ? t("work.searching") : t("work.disconnected");
+    const blocked = busy || paymentPending;
 
     return (
         <View style={[styles.card, { backgroundColor: colors.card || colors.surface }]}>
@@ -12,16 +13,16 @@ export default function WorkHeader({ online, busy, loading, colors, typography, 
                     <Text style={[styles.status, { color: colors.text, fontFamily: typography.bold }]}>{status}</Text>
                 </View>
                 <Text style={[styles.caption, { color: colors.secondaryText, fontFamily: typography.regular }]}>
-                    {busy ? t("work.keepGoing") : online ? t("work.waitingForRide") : t("work.connectPrompt")}
+                    {blocked ? t("work.keepGoing") : online ? t("work.waitingForRide") : t("work.connectPrompt")}
                 </Text>
             </View>
             <Pressable
                 accessibilityRole="switch"
-                accessibilityState={{ checked: online, disabled: loading || busy }}
+                accessibilityState={{ checked: online, disabled: loading || blocked }}
                 accessibilityLabel={online ? t("work.goOffline") : t("work.goOnline")}
-                disabled={loading || busy}
+                disabled={loading || blocked}
                 onPress={onToggle}
-                style={[styles.button, { backgroundColor: online ? "#E8EDF7" : colors.primary, opacity: loading || busy ? 0.55 : 1 }]}
+                style={[styles.button, { backgroundColor: online ? "#E8EDF7" : colors.primary, opacity: loading || blocked ? 0.55 : 1 }]}
             >
                 <Ionicons name={online ? "pause" : "power"} size={18} color={online ? colors.text : "#FFFFFF"} />
                 <Text style={[styles.buttonText, { color: online ? colors.text : "#FFFFFF", fontFamily: typography.bold }]}>

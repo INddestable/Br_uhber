@@ -8,6 +8,7 @@ import WorkHeader from "../../../components/work/WorkHeader";
 import RideRequestCard from "../../../components/work/RideRequestCard";
 import ActiveRideCard from "../../../components/work/ActiveRideCard";
 import RideSummary from "../../../components/work/RideSummary";
+import RidePaymentCard from "../../../components/work/RidePaymentCard";
 
 export default function WorkScreen() {
     const { colors, typography, isDark } = useTheme();
@@ -31,6 +32,7 @@ export default function WorkScreen() {
                 <WorkHeader
                     online={session.isOnline}
                     busy={session.isOnTrip}
+                    paymentPending={session.isWaitingForPayment}
                     loading={session.busy}
                     colors={colors}
                     typography={typography}
@@ -50,6 +52,17 @@ export default function WorkScreen() {
                         t={t}
                         onAccept={session.acceptRequest}
                         onReject={session.rejectRequest}
+                    />
+                ) : null}
+                {session.isWaitingForPayment && state.request ? (
+                    <RidePaymentCard
+                        request={state.request}
+                        colors={colors}
+                        typography={typography}
+                        t={t}
+                        onPaid={session.confirmElectronicPayment}
+                        onCancel={session.cancelElectronicPayment}
+                        onError={session.paymentError}
                     />
                 ) : null}
                 {state.ride ? (

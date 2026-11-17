@@ -2,6 +2,7 @@
   "expo": {
     "name": "Bruhber",
     "slug": "Bruhber",
+    "scheme": "bruhber",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,7 +29,8 @@
         {
           "locationWhenInUsePermission": "Bruhber utiliza tu ubicación mientras estás conectado para mostrarte en el mapa y ofrecerte viajes."
         }
-      ]
+      ],
+      "expo-web-browser"
     ]
   }
 }
