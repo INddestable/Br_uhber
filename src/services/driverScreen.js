@@ -16,26 +16,27 @@ import { uploadImage } from "../config/cloudinary";
 
 
 // Obtiene la cuenta de Firebase que utilizaremos.
+// Obtiene la cuenta de Firebase que utilizaremos.
 async function getOrCreateAccount(email, password) {
     const currentUser = auth.currentUser;
 
     // Si ya existe una sesión con el mismo correo, la reutilizamos.
-    if (currentUser) {
-        if (currentUser.email?.toLowerCase() === email.toLowerCase()) {
-            return currentUser;
-        }
-
-        throw new Error("EXISTING_SESSION_DIFFERENT_EMAIL");
+    if (currentUser?.email?.toLowerCase() === email.toLowerCase()) {
+        return currentUser;
     }
 
-    // Si no hay sesión, creamos la cuenta.
+    // Si hay otra sesión activa, la cerramos.
+    if (currentUser) {
+        await auth.signOut();
+    }
+
+    // Si no hay contraseña, no podemos crear ni iniciar sesión.
     if (!password) {
         throw new Error("PASSWORD_MISSING");
     }
 
-
-
     try {
+        // Crear una cuenta nueva.
         const credential = await createUserWithEmailAndPassword(
             auth,
             email,
@@ -89,6 +90,7 @@ export async function registerDriver(formData) {
     const driverRef = doc(db, "drivers", uid);
     const existingDriver = await getDoc(driverRef);
 
+    
     if (existingDriver.exists()) {
         return {
             uid,

@@ -1,4 +1,5 @@
 
+/* eslint-disable react-hooks/static-components */
 import { useState } from "react";
 import {
     View,
@@ -57,8 +58,8 @@ function isValidEmail(email) {
 
 export default function DocumentsScreen({ navigation }) {
     const { t } = useTranslation();
-    const { formData, updateFormData } = useRegistration();
-    const { colors } = useTheme();
+    const { formData, updateFormData, clearFormData } = useRegistration();
+    const { colors, typography } = useTheme();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
@@ -79,12 +80,14 @@ export default function DocumentsScreen({ navigation }) {
             fontSize: 26,
             fontWeight: "bold",
             marginBottom: 8,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.regular
         },
         description: {
             fontSize: 14,
             color: colors.secondaryText,
-            marginBottom: 15
+            marginBottom: 15,
+            fontFamily: typography.regular
         },
         section: {
             marginTop: 20,
@@ -93,19 +96,21 @@ export default function DocumentsScreen({ navigation }) {
             borderRadius: 10
         },
         sectionTitle: {
-            fontSize: 19,
-            fontWeight: "bold",
+            fontSize: 21,
+
             marginBottom: 15,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.bold
         },
         fieldContainer: {
             marginBottom: 15
         },
         label: {
-            fontSize: 15,
+            fontSize: 18,
             fontWeight: "600",
             marginBottom: 7,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.regular
         },
         input: {
             borderWidth: 1,
@@ -114,7 +119,8 @@ export default function DocumentsScreen({ navigation }) {
             padding: 12,
             backgroundColor: colors.card,
             color: colors.text,
-            fontSize: 15
+            fontSize: 15,
+            fontFamily: typography.regular
         },
         photoButton: {
             minHeight: 110,
@@ -129,7 +135,8 @@ export default function DocumentsScreen({ navigation }) {
         },
         photoButtonText: {
             color: colors.secondaryText,
-            fontSize: 14
+            fontSize: 18,
+            fontFamily: typography.regular
         },
         photoPreview: {
             width: "100%",
@@ -145,7 +152,8 @@ export default function DocumentsScreen({ navigation }) {
         },
         dateButtonText: {
             color: colors.text,
-            fontSize: 15
+            fontSize: 15,
+            fontFamily: typography.regular
         },
         error: {
             color: "#EF4444",
@@ -159,9 +167,10 @@ export default function DocumentsScreen({ navigation }) {
             marginBottom: 15
         },
         commissionText: {
-            fontSize: 14,
+            fontSize: 19,
             color: colors.text,
-            marginVertical: 4
+            marginVertical: 4,
+            fontFamily: typography.regular
         },
         termsRow: {
             flexDirection: "row",
@@ -187,8 +196,9 @@ export default function DocumentsScreen({ navigation }) {
         },
         termsText: {
             flex: 1,
-            fontSize: 14,
-            color: colors.text
+            fontSize: 18,
+            color: colors.text,
+            fontFamily: typography.regular
         },
         modalBackground: {
             flex: 1,
@@ -229,8 +239,8 @@ export default function DocumentsScreen({ navigation }) {
         },
         continueButtonText: {
             color: "#FFFFFF",
-            fontSize: 16,
-            fontWeight: "bold"
+            fontSize: 20,
+            fontFamily: typography.bold
         },
         settingsButton: {
             alignSelf: "flex-end",
@@ -244,7 +254,8 @@ export default function DocumentsScreen({ navigation }) {
         },
         settingsButtonText: {
             color: colors.text,
-            fontWeight: "600"
+            fontWeight: "600",
+            fontFamily: typography.regular
         }
     });
 
@@ -362,7 +373,7 @@ export default function DocumentsScreen({ navigation }) {
             console.log("Registro completado:", result.uid);
 
             // Ya no necesitamos conservar la contraseña.
-            updateFormData("password", "");
+            clearFormData();
 
             // Ir a la pantalla de aprobación pendiente.
             navigation.replace("Pending");

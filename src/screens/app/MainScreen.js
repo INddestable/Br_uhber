@@ -1,68 +1,100 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
-import { useLanguage } from "../../context/LanguageContext";
+import { Ionicons } from "@expo/vector-icons";
+import WorkScreen from "./work/WorkScreen";
+import EarningsScreen from "./earnings/EarningsScreen";
+import ProfileScreen from "./profile/ProfileScreen";
+import SettingsScreen from "./SettingsScreen";
 
-export default function MainScreen({ navigation }) {
-    const { colors } = useTheme();
-    const { language } = useLanguage();
+const Tab = createBottomTabNavigator();
 
-    const t = {
-        es: {
-            title: "Panel principal",
-            description: "¡Bienvenido a Bruhber Driver!",
-            settings: "Ajustes"
-        },
-        en: {
-            title: "Main panel",
-            description: "Welcome to Bruhber Driver!",
-            settings: "Settings"
-        }
-    }[language] || {};
+export default function MainScreen() {
+    const { colors, typography } = useTheme();
+    const { t, i18n } = useTranslation();
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.primary }]}>
-                {t.title}
-            </Text>
+        <Tab.Navigator
+            screenOptions={{
+                headerShown: false,
 
-            <Text style={[styles.description, { color: colors.secondaryText }]}>
-                {t.description}
-            </Text>
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.secondaryText,
 
-            <Pressable
-                style={[styles.button, { backgroundColor: colors.primary }]}
-                onPress={() => navigation.navigate("Settings")}
-            >
-                <Text style={styles.buttonText}>{t.settings}</Text>
-            </Pressable>
-        </View>
+                tabBarStyle: {
+                    backgroundColor: colors.surface,
+                    paddingTop: 10,
+                    height: 100
+                },
+
+                tabBarLabelStyle: {
+                    fontSize: 15,
+                    paddingTop: 10,
+                    fontFamily: typography.regular
+                },
+            }}
+        >
+            <Tab.Screen
+                name="Work"
+                component={WorkScreen}
+                options={{
+                    tabBarLabel: t("navigation.work"),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Ionicons
+                            name={focused ? "car-sharp" : "car-outline"}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Earnings"
+                component={EarningsScreen}
+                options={{
+                    tabBarLabel: t("navigation.earnings"),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Ionicons
+                            name={focused ? "wallet-sharp" : "wallet-outline"}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    tabBarLabel: t("navigation.profile"),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Ionicons
+                            name={focused ? "person-sharp" : "person-outline"}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{
+                    tabBarLabel: t("navigation.settings"),
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <Ionicons
+                            name={focused ? "settings-sharp" : "settings-outline"}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            
+        </Tab.Navigator>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 25
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold"
-    },
-    description: {
-        fontSize: 16,
-        marginTop: 10,
-        marginBottom: 30
-    },
-    button: {
-        paddingVertical: 13,
-        paddingHorizontal: 35,
-        borderRadius: 10
-    },
-    buttonText: {
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        fontSize: 16
-    }
-});

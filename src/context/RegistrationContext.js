@@ -10,9 +10,12 @@ export function RegistrationProvider({ children }) {
             [field]: value
         }));
     };
+    const clearFormData = () => {
+        setFormData({});
+    };
 
     return (
-        <RegistrationContext.Provider value={{ formData, updateFormData }}>
+        <RegistrationContext.Provider     value={{ formData, updateFormData, clearFormData }}>
             {children}
         </RegistrationContext.Provider>
     );

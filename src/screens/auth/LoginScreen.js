@@ -17,7 +17,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 
 export default function LoginScreen({ navigation }) {
-    const { colors } = useTheme();
+    const { colors, typography } = useTheme();
     const { t } = useTranslation();
 
     const [email, setEmail] = useState("");
@@ -88,7 +88,8 @@ export default function LoginScreen({ navigation }) {
             flex: 1,
             justifyContent: "center",
             padding: 25,
-            backgroundColor: colors.background
+            backgroundColor: colors.background,
+            fontFamily: typography.regular
         },
         settingsButton: {
             position: "absolute",
@@ -100,11 +101,13 @@ export default function LoginScreen({ navigation }) {
         },
         settingsButtonText: {
             color: colors.text,
-            fontSize: 14
+            fontSize: 14,
+            fontFamily: typography.regular
         },
         title: {
-            fontSize: 36,
-            fontWeight: "bold",
+            fontSize: 40,
+
+            fontFamily: typography.bold,
             textAlign: "center",
             color: colors.primary,
             marginBottom: 10
@@ -113,7 +116,8 @@ export default function LoginScreen({ navigation }) {
             fontSize: 22,
             textAlign: "center",
             marginBottom: 30,
-            color: colors.text
+            color: colors.text,
+            fontFamily: typography.bold
         },
         input: {
             borderWidth: 1,
@@ -122,6 +126,7 @@ export default function LoginScreen({ navigation }) {
             padding: 14,
             marginBottom: 15,
             fontSize: 16,
+            fontFamily: typography.regular,
             color: colors.text,
             backgroundColor: colors.surface
         },
@@ -130,18 +135,19 @@ export default function LoginScreen({ navigation }) {
             padding: 16,
             borderRadius: 10,
             alignItems: "center",
-            marginTop: 10
+            marginTop: 10,
         },
         buttonText: {
             color: "#FFFFFF",
-            fontSize: 16,
-            fontWeight: "bold"
+            fontSize: 20,
+            fontFamily: typography.bold
         },
         registerText: {
             textAlign: "center",
             marginTop: 25,
             color: colors.primary,
-            fontSize: 15
+            fontSize: 15,
+            fontFamily: typography.regular
         }
     });
 
@@ -198,7 +204,11 @@ export default function LoginScreen({ navigation }) {
             </Pressable>
 
             <Pressable
-                onPress={() => navigation.navigate("Register")}
+                onPress={() =>
+                    navigation.getParent()?.navigate("Registration", {
+                        screen: "PersonalData"
+                    })
+                }
             >
                 <Text style={styles.registerText}>
                     {t("login.registerLink", "¿No tienes cuenta? Regístrate")}

@@ -1,0 +1,418 @@
+BRUHBER - GUIA TECNICA PARA BLOC DE NOTAS
+========================================
+
+Proposito
+---------
+Esta guia describe la estructura actual del proyecto, las responsabilidades de
+sus pantallas y servicios, y el recorrido del conductor por la aplicacion. Esta
+escrita como referencia de lectura: no reemplaza el codigo ni las reglas que
+estan publicadas en Firebase Console.
+
+Bruhber es un prototipo academico de una app para conductores. Los pasajeros y
+viajes son ficticios. Checkout Pro se utiliza en sandbox y la API de pagos corre
+localmente durante las pruebas; no hay viajes reales, liquidacion bancaria ni
+pagos divididos.
+
+
+1. INICIO Y CONTEXTOS
+---------------------
+
+App.js
+  Es el punto de entrada de la interfaz. Configura los proveedores globales
+  (gestos, areas seguras, idioma, tema y autenticacion), carga la tipografia y
+  muestra RootNavigator dentro de NavigationContainer. Los contextos evitan
+  repetir estado global en cada pantalla.
+
+src/context/AuthContext.js
+  Observa el estado de Firebase Authentication y expone al resto de la app el
+  usuario autenticado y el estado de carga. No contiene la interfaz del login.
+
+src/context/RegistrationContext.js
+  Conserva temporalmente los datos del formulario durante los pasos del
+  registro. Al enviar el registro final, el servicio de conductor guarda el
+  perfil persistente en Firestore.
+
+src/context/ThemeContext.js
+  Provee los colores y estilos tipograficos del tema activo. Guarda la
+  preferencia claro/oscuro en almacenamiento local.
+
+src/context/LanguageContext.js y src/config/i18n.js
+  Inicializan i18next, cargan traducciones y conservan la seleccion de idioma.
+  Los recursos estan en src/locales/es/translation.json y
+  src/locales/en/translation.json.
+
+
+2. NAVEGACION Y ACCESO
+----------------------
+
+src/navigation/RootNavigator.js
+  Navegador principal. Presenta las rutas Auth, Registration, Pending, Main y
+  Settings; el estado de autenticacion/aprobacion determina el flujo que la app
+  muestra.
+
+src/navigation/AuthNavigator.js
+  Agrupa la entrada de autenticacion. El flujo funcional de registro comienza
+  desde LoginScreen y continua en RegistrationNavigator.
+
+src/navigation/RegistrationNavigator.js
+  Organiza los pasos PersonalData -> Vehicle -> Documents -> Pending.
+
+src/screens/app/MainScreen.js
+  Define las cuatro pestanas inferiores reales: Trabajo, Ganancias, Perfil y
+  Ajustes. Aunque existen archivos llamados MainTabNavigator.js y
+  DriverNavigation.js, estos son archivos vacios en el estado revisado; MainScreen
+  es quien actualmente crea el navegador de pestanas.
+
+src/screens/auth/LoginScreen.js
+  Presenta el formulario de acceso, invoca Firebase Authentication y ofrece el
+  enlace que inicia el registro.
+
+src/screens/auth/RegisterScreen.js
+  Existe como pantalla separada, pero el flujo de registro principal observado
+  comienza desde LoginScreen y usa los tres pasos de RegistrationNavigator.
+
+src/screens/aproval/PendingScreen.js
+  Informa al conductor que su solicitud esta pendiente. La carpeta aparece
+  escrita como "aproval" en el proyecto; mantener esa ruta evita imports rotos.
+
+
+3. REGISTRO Y PERFIL
+--------------------
+
+src/screens/registration/PersonalDataScreen.js
+  Captura datos personales y foto de perfil, valida el paso y guarda el borrador
+  compartido en RegistrationContext.
+
+src/screens/registration/VehicleScreen.js
+  Captura categoria, placa, marca, modelo, ano, color, capacidad y foto del
+  vehiculo; despues continua al paso documental.
+
+src/screens/registration/DocumentsScreen.js
+  Recoge licencia, SOAT, revision tecnico-mecanica, fechas, correo de pago y
+  aceptacion de terminos. Sube archivos y termina creando el documento del
+  conductor con estado inicial pendiente.
+
+src/services/driverScreen.js
+  Contiene el guardado inicial del perfil y los datos del registro en Firestore.
+
+src/utils/uploadImage.js y src/utils/getCloudinaryUrl.js
+  Ayudan a seleccionar/subir medios y resolver URL de Cloudinary para mostrarlos.
+  La configuracion local de Cloudinary no debe contener un API Secret en el
+  cliente.
+
+src/screens/app/profile/ProfileScreen.js
+  Lee el documento drivers/{uid} y organiza la vista en secciones de informacion
+  personal, vehiculo y documentos.
+
+src/components/profile/ProfileTabs.js
+  Selector de seccion dentro del perfil.
+
+src/components/profile/PersonalInfo.js
+src/components/profile/VehicleInfo.js
+src/components/profile/DocumentsInfo.js
+  Presentan y conectan cada conjunto de campos con la edicion correspondiente.
+
+src/components/profile/ProfileSectionForm.js
+  Componente de formulario compartido: campos, carga/seleccion de imagen, fechas,
+  tema y traducciones. Evita mantener tres formularios casi iguales.
+
+src/utils/updateDriverProfile.js
+  Escribe cambios de perfil en el campo anidado correspondiente. La forma de
+  actualizacion tiene que coincidir con las reglas de Firestore publicadas.
+
+src/screens/app/SettingsScreen.js
+  Permite elegir idioma y tema. Las preferencias se guardan mediante sus
+  contextos, no como una edicion del perfil en Firestore.
+
+
+4. TRABAJO, MAPA Y VIAJE SIMULADO
+---------------------------------
+
+src/screens/app/work/WorkScreen.js
+  Es la composicion visual de la pantalla Trabajo. Renderiza el mapa y los
+  paneles superiores/inferiores segun el estado de useWorkSession; delega
+  operaciones a ese hook en vez de implementar ahi la logica del viaje.
+
+src/hooks/useWorkSession.js
+  Orquesta la sesion del conductor: ubicacion, conectar/desconectar, solicitudes,
+  pago previo para viajes electronicos, trayecto a recogida, pasajero a bordo,
+  trayecto a destino, finalizacion, guardado y resumen. Controla temporizadores y
+  transiciones para no abrir solicitudes mientras haya una solicitud o viaje en
+  curso.
+
+src/services/locationService.js
+  Solicita permiso de ubicacion en primer plano, verifica que los servicios GPS
+  esten activos y obtiene una posicion actual o una ultima lectura admisible.
+  Permite suscribirse a cambios mientras se trabaja. Una coordenada de camara
+  inicial no equivale a una lectura GPS del conductor.
+
+src/services/availabilityService.js
+  Actualiza availabilityStatus y la ultima ubicacion del propio conductor en
+  Firestore. Las reglas publicadas determinan exactamente que campos se aceptan.
+
+src/components/work/WorkHeader.js
+  Muestra el estado conectado/desconectado y el control para cambiarlo.
+
+src/components/work/WorkMap.js y variantes
+  Abstraen la representacion del mapa segun plataforma. WorkMap.android.js,
+  WorkMap.web.js y WorkMapNative.js permiten adaptar el renderizado. La vista usa
+  tecnologia MapLibre/WebView y cartografia de OpenFreeMap/OpenStreetMap; no es
+  Google Maps. Hay marcador de conductor y representacion de la ruta/pasajero.
+
+src/components/work/DriverMarker.js
+  Representa visualmente el vehiculo/conductor en el mapa.
+
+src/services/rideSimulationService.js
+  Genera pasajeros, categoria, forma de pago, propina ficticia, recogida cercana
+  al conductor y destino. Consulta OSRM para obtener una ruta de conduccion y
+  ofrece interpolacion para desplazar el marcador durante la simulacion. Los
+  servicios publicos pueden no estar siempre disponibles.
+
+src/components/work/RideRequestCard.js
+  Muestra los datos de la solicitud y cuenta regresiva, con acciones aceptar y
+  rechazar.
+
+src/components/work/RidePaymentCard.js
+  Presenta la accion para abrir Checkout Pro cuando el pasajero ficticio eligio
+  pago electronico. El recorrido solo debe empezar despues de que el API confirme
+  el pago aprobado.
+
+src/components/work/ActiveRideCard.js
+  Presenta fase y progreso del viaje, llegada a recogida, confirmacion de pasajero
+  a bordo, cancelar/reintentar y herramienta de desarrollo para saltar la
+  simulacion.
+
+src/components/work/RideSummary.js
+  Presenta el resumen al finalizar el recorrido y permite cerrarlo para volver a
+  buscar solicitudes si el conductor sigue conectado.
+
+
+5. TARIFA, VIAJES Y GANANCIAS
+-----------------------------
+
+src/config/pricing.js
+  Fuente central de base, valores por distancia/tiempo, tarifa minima,
+  multiplicadores por categoria y comision. calculateFare({ distanceKm,
+  durationMin, category, tip }) devuelve fare, commission y driverEarnings.
+  Los importes son enteros COP; la propina se suma al neto del conductor y no
+  forma parte de la base de comision.
+
+src/services/tripService.js
+  Guarda los viajes terminados con una escritura idempotente y escucha la
+  coleccion trips filtrada por driverId. Convierte timestamps de Firestore a
+  milisegundos y ordena por completedAt.
+
+src/services/rideHistoryService.js
+  Mantiene utilidades antiguas/de compatibilidad de historial local. La pantalla
+  actual de Ganancias usa principalmente tripService para la lista de Firestore.
+
+src/services/earningsService.js
+  Filtra por dia/semana/mes/rango, calcula cantidad de viajes, facturacion,
+  comisiones, propinas, ganancia neta y promedio. Tambien estima saldo pendiente
+  considerando la diferencia entre efectivo y pago electronico.
+
+src/screens/app/earnings/EarningsScreen.js
+  Escucha viajes y estados de pago, calcula resumenes con useMemo, presenta
+  filtros, saldo, historial en FlatList, cuenta de Mercado Pago de prueba y modal
+  de detalle. Usa importes ya guardados en cada viaje; no aplica tarifas actuales
+  a viajes antiguos.
+
+src/components/earnings/MercadoPagoAccountCard.js
+  Informa la cuenta vendedora de prueba configurada para el API. No representa
+  una vinculacion OAuth independiente por conductor.
+
+Historial y pago
+  Un viaje terminado se persiste en Firestore. Los estados de Checkout Pro se
+  relacionan con el ID del viaje en el almacenamiento JSON local de la API. El
+  historial combina informacion del viaje y del pago para mostrar el metodo y
+  estado que corresponden.
+
+
+6. INTEGRACION MERCADO PAGO DE PRUEBA
+------------------------------------
+
+src/services/mercadoPagoService.js
+  Conecta la app con la API de pagos, solicita/consulta el checkout y escucha los
+  estados disponibles. El Access Token no debe estar en este servicio ni en la
+  aplicacion movil.
+
+payout-api/local-api.js
+  Servidor Node local de desarrollo. Verifica la identidad Firebase, comprueba
+  el conductor y su aprobacion, crea preferencia Checkout Pro con el token del
+  vendedor que esta en el entorno local, consulta estado con Mercado Pago y
+  conserva referencias de pago en un archivo JSON local.
+
+payout-api/README.md
+  Contiene los pasos para configurar variables, iniciar el API, exponer puerto
+  8080 mediante ngrok y probar Checkout Pro.
+
+Flujo de cobro electronico
+  1. El conductor acepta la solicitud.
+  2. Bruhber solicita crear el checkout y abre el navegador seguro del sistema.
+  3. El comprador de prueba paga desde el checkout.
+  4. Mercado Pago devuelve al deep link de la app (o al enlace de desarrollo de
+     Expo Go).
+  5. Bruhber consulta el API; la redireccion por si sola no significa aprobado.
+  6. El trayecto inicia unicamente cuando el API verifica el pago aprobado.
+
+Limitaciones actuales
+  El mismo vendedor de prueba esta configurado para el prototipo. No hay OAuth
+  por conductor. El JSON de pagos solo existe en la computadora que ejecuta el
+  API; el servicio requiere Node y ngrok activos. Esto no es una integracion de
+  produccion ni una liquidacion de fondos. No copies Access Tokens, claves,
+  contrasenas, codigos o numeros de tarjeta en archivos versionados.
+
+
+7. OTROS ARCHIVOS Y NOTAS DE MANTENIMIENTO
+-----------------------------------------
+
+src/services/mercadoPagoService.js
+  Adaptador de la app para consultar las rutas API de Mercado Pago.
+
+src/services/driverScreen.js
+  Operaciones de creacion/lectura del documento del conductor usadas por el
+  flujo de registro u otras pantallas.
+
+src/config/firebase.js y src/config/cloudinary.js
+  Configuracion local de servicios del proyecto. Los archivos de credenciales
+  pueden estar fuera del repositorio; configura los tuyos de forma privada.
+
+src/theme/light.js y src/theme/dark.js
+src/navigation/MainTabNavigator.js y src/navigation/DriverNavigation.js
+  Estos archivos estaban vacios al revisar la estructura. No se deben confundir
+  con el flujo activo: ThemeContext y MainScreen proveen esas funciones hoy.
+
+Reglas Firebase
+  La app movil usa Firebase cliente y las reglas publicadas en la consola son la
+  autoridad. No hagas mas permisivas las reglas para silenciar un error. Revisa
+  UID, claves afectadas, tipos, estados y timestamps requeridos por la regla.
+
+
+8. DIAGRAMA ASCII: INTERACCION DEL CONDUCTOR
+--------------------------------------------
+
+                          +------------------+
+                          | Abrir Bruhber    |
+                          +--------+---------+
+                                   |
+                                   v
+                    +--------------+---------------+
+                    | Sesion de Firebase activa?   |
+                    +---------+--------------------+
+                              | no
+                              v
+                    +---------+----------+
+                    | Login / Registro  |
+                    +----+---------------+
+                         |
+                         v
+              +----------+-----------+
+              | Datos personales     |
+              | Vehiculo y documentos|
+              +----------+-----------+
+                         |
+                         v
+                +--------+---------+
+                | Estado pending   |
+                +--------+---------+
+                         | aprobacion en Firebase
+                         v
+              +----------+------------+
+              | Trabajo / Ganancias / |
+              | Perfil / Ajustes      |
+              +----------+------------+
+                         |
+                         v
+                +--------+---------+
+                | Pulsar Conectarme |
+                +--------+---------+
+                         |
+                         v
+           +-------------+---------------+
+           | Permiso + GPS + ubicacion   |
+           | valida                      |
+           +------+------+---------------+
+                  | si   | no
+                  |      +----> Mostrar error y seguir desconectado
+                  v
+        +---------+-----------+
+        | availabilityStatus  |
+        | available en Firebase|
+        +---------+-----------+
+                  |
+                  v
+        +---------+-----------+
+        | Buscar pasajero     |
+        +---------+-----------+
+                  |
+                  v
+        +---------+-----------+
+        | Solicitud ficticia  |
+        +----+------------+---+
+             |            |
+      rechazar/expira     aceptar
+             |            |
+             |            v
+             |     +------+----------------+
+             |     | Pago en efectivo?     |
+             |     +----+-------------+----+
+             |          | si          | no
+             |          |             v
+             |          |     Checkout Pro (sandbox)
+             |          |             |
+             |          |     pago aprobado?
+             |          |       | si  | no
+             |          |       |     +--> No iniciar viaje
+             |          +-------+
+             |                  v
+             |        +---------+----------+
+             |        | Ruta a recogida   |
+             |        +---------+----------+
+             |                  |
+             |                  v
+             |        +---------+----------+
+             |        | Confirmar a bordo |
+             |        +---------+----------+
+             |                  |
+             |                  v
+             |        +---------+----------+
+             |        | Ruta al destino   |
+             |        +---------+----------+
+             |                  |
+             |                  v
+             |        +---------+----------+
+             |        | Calcular y guardar|
+             |        | viaje completado |
+             |        +---------+----------+
+             |                  |
+             |                  v
+             |        +---------+----------+
+             |        | Ganancias e       |
+             |        | historial         |
+             |        +---------+----------+
+             +------------------+----------> Buscar de nuevo si sigue conectado
+
+
+9. COMO SEGUIR EL CODIGO
+------------------------
+
+Para entender un comportamiento, comienza por la pantalla, sigue el componente
+que recibe las acciones, encuentra el hook o servicio que realiza el trabajo y
+termina verificando las reglas/estructura remota. Ejemplos:
+
+  Perfil: ProfileScreen -> componente de seccion -> updateDriverProfile ->
+          Firestore y sus reglas.
+
+  Conectar: WorkScreen -> WorkHeader -> useWorkSession -> locationService y
+            availabilityService -> documento drivers/{uid}.
+
+  Viaje: useWorkSession -> rideSimulationService -> tripService -> trips ->
+         EarningsScreen.
+
+  Cobro: RidePaymentCard -> mercadoPagoService -> API local -> Mercado Pago ->
+         deep link -> consulta de estado -> inicio del recorrido.
+
+README principal: README.md
+Guia de API y variables: payout-api/README.md
+Bitacora de consultas: docs/AI_LOG.md
+
